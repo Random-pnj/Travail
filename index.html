@@ -1,0 +1,400 @@
+<title>Outils Métallerie</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+/* Layout: grille d'outils avec header industriel — palette acier / accent orange oxyde */
+:root {
+  --bg:       #F2F3F5;
+  --surface:  #FFFFFF;
+  --border:   #D0D4DC;
+  --fg:       #161A22;
+  --fg2:      #52596B;
+  --accent:   #C45518;
+  --accent-bg:#FDF0EA;
+  --tag-bg:   #E8EBF0;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'IBM Plex Sans', system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:       #0F1117;
+    --surface:  #191C24;
+    --border:   #2A2E3A;
+    --fg:       #E4E8F0;
+    --fg2:      #7A8299;
+    --accent:   #DC6E38;
+    --accent-bg:#201208;
+    --tag-bg:   #1E2230;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:       #0F1117;
+  --surface:  #191C24;
+  --border:   #2A2E3A;
+  --fg:       #E4E8F0;
+  --fg2:      #7A8299;
+  --accent:   #DC6E38;
+  --accent-bg:#201208;
+  --tag-bg:   #1E2230;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100%;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 40px;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--fg);
+  padding: 0 max(24px, env(safe-area-inset-left, 0px)) 0 max(24px, env(safe-area-inset-left, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  border-bottom: 2px solid var(--accent);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 11;
+  background: var(--fg);
+}
+.logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-mark {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.logo-sub {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: .06em;
+  color: rgba(255,255,255,.45);
+  margin-top: 2px;
+}
+.header-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(255,255,255,.35);
+  text-align: right;
+  line-height: 1.7;
+}
+.header-meta span { color: rgba(255,255,255,.6); }
+
+/* ── MAIN ── */
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-top: 36px;
+}
+
+/* ── SECTION ── */
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  padding-left: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── GRID ── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+/* ── CARD ── */
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s, box-shadow .15s;
+  position: relative;
+  overflow: hidden;
+}
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity .15s;
+}
+.tool-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 18px rgba(0,0,0,.08);
+}
+.tool-card:hover::before { opacity: 1; }
+.tool-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+.card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg);
+  text-wrap: balance;
+}
+.card-desc {
+  font-size: 12.5px;
+  color: var(--fg2);
+  line-height: 1.55;
+  flex: 1;
+}
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.card-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--fg2);
+  background: var(--tag-bg);
+  padding: 3px 7px;
+  border-radius: 3px;
+}
+.card-arrow {
+  font-size: 13px;
+  color: var(--border);
+  transition: color .15s, transform .15s;
+}
+.tool-card:hover .card-arrow {
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.footer-info {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--fg2);
+  letter-spacing: .04em;
+}
+.footer-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg2);
+}
+.footer-count strong {
+  color: var(--accent);
+  font-size: 14px;
+}
+
+@media (max-width: 500px) {
+  .tools-grid { grid-template-columns: 1fr; }
+  .header-meta { display: none; }
+}
+</style>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">DR</div>
+    <div>
+      Outils Métallerie
+      <div class="logo-sub">Dominique Rossier — Construction métallique</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div>Random-pnj / travail</div>
+    <div><span>GitHub Pages</span> · Vaud, CH</div>
+  </div>
+</header>
+
+<main>
+
+  <div class="section-label">Calculs structurels &amp; garde-corps</div>
+  <div class="tools-grid">
+
+    <a class="tool-card" href="calculateur_barreaudage.html">
+      <div class="card-icon">🔧</div>
+      <div class="card-name">Calculateur Barreaudage</div>
+      <div class="card-desc">Répartition des barreaux entre montants, vérification du vide maximal réglementaire (119 mm), fiche technique imprimable et export Excel.</div>
+      <div class="card-footer">
+        <span class="card-tag">Garde-corps</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="calculateur_barreaudage_tech.html">
+      <div class="card-icon">📐</div>
+      <div class="card-name">Barreaudage Technique</div>
+      <div class="card-desc">Version avancée du calculateur de barreaudage avec interface sombre, gestion multi-positions, export et récapitulatif de chantier.</div>
+      <div class="card-footer">
+        <span class="card-tag">Garde-corps</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="calculateur-escalier_ok.html">
+      <div class="card-icon">🪜</div>
+      <div class="card-name">Calculateur d'Escalier</div>
+      <div class="card-desc">Dimensionnement selon Blondel (2H + G = 600–640 mm), nombre de marches, giron, pente, longueur de limon et visualisation en coupe.</div>
+      <div class="card-footer">
+        <span class="card-tag">Escalier</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="angle_tablette_alu.html">
+      <div class="card-icon">🪟</div>
+      <div class="card-name">Tablette de Fenêtre — Angle de Coupe</div>
+      <div class="card-desc">Calcul de l'angle de coupe pour tablettes alu selon pente β et angle de pilier α, avec développé net du flan, corrections d'épaisseur et schéma coté.</div>
+      <div class="card-footer">
+        <span class="card-tag">Tôlerie</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="dilatation_thermique.html">
+      <div class="card-icon">🌡️</div>
+      <div class="card-name">Dilatation Thermique</div>
+      <div class="card-desc">Calcul ΔL = L₀ × α × ΔT pour acier, inox, alu, verre, béton, bois, cuivre, zinc et PVC. Comparaison deux matériaux, dimensionnement joint silicone.</div>
+      <div class="card-footer">
+        <span class="card-tag">Physique</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-label">Débitage &amp; optimisation matière</div>
+  <div class="tools-grid">
+
+    <a class="tool-card" href="debitage_v22.html">
+      <div class="card-icon">✂️</div>
+      <div class="card-name">Optimisation Débitage</div>
+      <div class="card-desc">Optimisation automatique de coupe de profils métalliques sur barres standard. Minimise les chutes, génère le plan de débit et la liste de coupe.</div>
+      <div class="card-footer">
+        <span class="card-tag">Débitage</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="Calculateur de Positions et Quantités.html">
+      <div class="card-icon">📋</div>
+      <div class="card-name">Positions &amp; Quantités</div>
+      <div class="card-desc">Saisie de pièces par position (1D longueur / 2D format tôle), regroupement automatique par longueur unique, export Excel et liste de débit imprimable.</div>
+      <div class="card-footer">
+        <span class="card-tag">Quantitatif</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="calculateur-percage_ok.html">
+      <div class="card-icon">⚫</div>
+      <div class="card-name">Répartition Perçage</div>
+      <div class="card-desc">Calcul d'entraxe et positions de trous sur une longueur donnée. Ajustement dynamique du nombre de trous et de la distance de bout, fiche technique imprimable.</div>
+      <div class="card-footer">
+        <span class="card-tag">Perçage</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-label">Utilitaires</div>
+  <div class="tools-grid">
+
+    <a class="tool-card" href="calculateur-tolerie-v2.html">
+      <div class="card-icon">📏</div>
+      <div class="card-name">Calculateur Tôlerie</div>
+      <div class="card-desc">Calculs de développé, poids et quantitatif pour pièces en tôle. Prise en charge des plis, coefficients K et différents alliages.</div>
+      <div class="card-footer">
+        <span class="card-tag">Tôlerie</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="pdf-merger_ok.html">
+      <div class="card-icon">📄</div>
+      <div class="card-name">Fusion PDF</div>
+      <div class="card-desc">Fusionne, réordonne et fait pivoter des pages PDF directement dans le navigateur, sans serveur. Aperçu page par page avant export.</div>
+      <div class="card-footer">
+        <span class="card-tag">Utilitaire</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <footer>
+    <div class="footer-info">random-pnj.github.io/travail · Vaud, Suisse</div>
+    <div class="footer-count"><strong>10</strong> outils</div>
+  </footer>
+
+</main>

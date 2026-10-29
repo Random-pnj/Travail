@@ -1,0 +1,1558 @@
+<title>Calculateur Tôlerie</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* ─── Design tokens ───────────────────────────────────────────────────────── */
+/* Layout: sidebar sticky gauche 320px + main scrollable droite */
+:root {
+  --bg:        #f0f2f7;
+  --surface:   #ffffff;
+  --surface2:  #f8fafc;
+  --border:    #e2e8f0;
+  --border2:   #cbd5e1;
+  --fg:        #1e2a3b;
+  --fg2:       #4b5563;
+  --fg3:       #9ca3af;
+  --accent:    #4f5fe8;
+  --accent2:   #e0e3fd;
+  --accent3:   #c7cbfb;
+  --green:     #059669;
+  --green2:    #d1fae5;
+  --red:       #dc2626;
+  --red2:      #fee2e2;
+  --amber:     #d97706;
+  --amber2:    #fef3c7;
+  --inox-col:  #0369a1;
+  --inox-bg:   #e0f2fe;
+  --alu-col:   #92400e;
+  --alu-bg:    #fef3c7;
+  --other-col: #6b21a8;
+  --other-bg:  #f3e8ff;
+  --shadow:    0 2px 8px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --radius:    14px;
+  --radius-sm: 8px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:       #0f1623;
+    --surface:  #1a2235;
+    --surface2: #1e2a3e;
+    --border:   #2a3a55;
+    --border2:  #3a4f70;
+    --fg:       #e8edf5;
+    --fg2:      #8fa0b8;
+    --fg3:      #4d6180;
+    --accent:   #6875ef;
+    --accent2:  #1e244a;
+    --accent3:  #2a3168;
+    --green2:   #064e3b;
+    --red2:     #450a0a;
+    --amber2:   #451a03;
+    --inox-bg:  #082f49;
+    --alu-bg:   #451a03;
+    --other-bg: #2e1065;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:       #0f1623;
+  --surface:  #1a2235;
+  --surface2: #1e2a3e;
+  --border:   #2a3a55;
+  --border2:  #3a4f70;
+  --fg:       #e8edf5;
+  --fg2:      #8fa0b8;
+  --fg3:      #4d6180;
+  --accent:   #6875ef;
+  --accent2:  #1e244a;
+  --accent3:  #2a3168;
+  --green2:   #064e3b;
+  --red2:     #450a0a;
+  --amber2:   #451a03;
+  --inox-bg:  #082f49;
+  --alu-bg:   #451a03;
+  --other-bg: #2e1065;
+  color-scheme: dark;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+  min-height: 100%;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.app-header {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  padding: 12px 0;
+}
+.header-inner {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.logo-box {
+  background: var(--accent); border-radius: 10px;
+  width: 40px; height: 40px; display: grid; place-items: center; flex-shrink: 0;
+}
+.logo-box svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2; }
+.app-title { font-size: 20px; font-weight: 700; color: var(--fg); line-height: 1.1; }
+.app-sub { font-size: 12px; color: var(--fg3); margin-top: 1px; }
+.header-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+
+/* ─── Tabs ───────────────────────────────────────────────────────────────── */
+.tabs-bar {
+  display: flex; gap: 4px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 max(16px, env(safe-area-inset-left, 0px));
+}
+.tab-btn {
+  padding: 10px 16px; border: none; background: transparent;
+  color: var(--fg2); font-size: 13px; font-weight: 600; cursor: pointer;
+  border-bottom: 3px solid transparent; transition: all .2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-btn:hover:not(.active) { color: var(--fg); background: var(--surface2); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ─── Main layout ────────────────────────────────────────────────────────── */
+.main-layout {
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  gap: 16px;
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .sidebar { position: static !important; max-height: none !important; }
+}
+
+/* ─── Sidebar ────────────────────────────────────────────────────────────── */
+.sidebar {
+  position: sticky; top: 57px;
+  max-height: calc(100vh - 73px);
+  overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.sidebar::-webkit-scrollbar { width: 5px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ─── Cards ──────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+.card-title {
+  font-size: 13px; font-weight: 700; color: var(--fg);
+  text-transform: uppercase; letter-spacing: .6px;
+  padding-bottom: 10px; margin-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+  display: flex; align-items: center; gap: 7px;
+}
+.card-title svg { width: 15px; height: 15px; stroke: var(--accent); fill: none; stroke-width: 2; flex-shrink:0; }
+
+/* ─── Forms ──────────────────────────────────────────────────────────────── */
+.form-group { margin-bottom: 10px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+label { display: block; font-size: 11px; font-weight: 600; color: var(--fg2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+input, select, textarea {
+  width: 100%; padding: 7px 10px;
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--fg); font-size: 13px;
+  font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent2); }
+input[readonly] { background: var(--surface2); color: var(--fg2); cursor: default; }
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border: none; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: filter .15s, opacity .15s; white-space: nowrap;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-green   { background: var(--green);  color: #fff; }
+.btn-red     { background: var(--red);    color: #fff; }
+.btn-amber   { background: var(--amber);  color: #fff; }
+.btn-steel   { background: #334155;       color: #fff; }
+.btn-outline {
+  background: transparent; color: var(--fg);
+  border: 1.5px solid var(--border2);
+}
+.btn-outline:hover { background: var(--surface2); }
+.btn-sm { padding: 4px 9px; font-size: 12px; }
+.btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; flex-shrink: 0; }
+
+/* ─── Result boxes ───────────────────────────────────────────────────────── */
+.result-box {
+  background: var(--accent2);
+  border: 1.5px solid var(--accent3);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px; margin-bottom: 8px;
+}
+.result-box .rl { font-size: 11px; color: var(--fg2); margin-bottom: 2px; }
+.result-box .rv { font-size: 20px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.result-box.amber-box { background: var(--amber2); border-color: #fcd34d; }
+.result-box.amber-box .rv { color: var(--amber); }
+
+/* ─── Chapitre panel ─────────────────────────────────────────────────────── */
+.chap-panel {
+  background: var(--accent2);
+  border: 1.5px solid var(--accent3);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px; margin-bottom: 10px;
+}
+.chap-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none;
+  font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: .4px;
+  text-transform: uppercase;
+}
+.chap-panel-body { margin-top: 8px; }
+.chap-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 6px; border-radius: 6px;
+  background: var(--surface); border: 1px solid var(--border); margin-bottom: 4px;
+}
+.chap-row-name { flex: 1; font-size: 12px; font-weight: 600; color: var(--fg); }
+.chap-mult-input {
+  width: 54px !important; padding: 3px 6px !important;
+  font-size: 12px !important; font-weight: 700; text-align: center;
+  color: var(--accent);
+}
+.chap-badge {
+  display: inline-flex; align-items: center;
+  background: var(--accent); color: #fff;
+  border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ─── Tables ─────────────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: var(--surface2); }
+th {
+  padding: 9px 7px; text-align: left;
+  font-size: 11px; font-weight: 700; color: var(--fg2);
+  text-transform: uppercase; letter-spacing: .5px;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+td { padding: 6px 7px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:hover td { background: var(--surface2); }
+.table-input {
+  width: 100%; padding: 4px 6px;
+  border: 1px solid var(--border2); border-radius: 5px;
+  background: var(--surface); color: var(--fg);
+  font-size: 12px; font-family: 'JetBrains Mono', monospace;
+}
+.table-input:focus { outline: none; border-color: var(--accent); }
+.table-select {
+  width: 100%; padding: 4px 4px;
+  border: 1px solid var(--border2); border-radius: 5px;
+  background: var(--surface); color: var(--fg); font-size: 12px;
+}
+.table-select:focus { outline: none; border-color: var(--accent); }
+
+/* ─── Séparateurs chapitres ──────────────────────────────────────────────── */
+.chap-sep-row td {
+  background: linear-gradient(90deg, var(--accent2) 0%, var(--surface2) 100%);
+  border-top: 2px solid var(--accent); border-bottom: 1px solid var(--accent3);
+  font-weight: 700; font-size: 12px; color: var(--fg); cursor: pointer;
+  padding: 6px 10px; user-select: none;
+}
+.chap-sep-row:hover td { filter: brightness(0.96); }
+
+/* ─── Mat badges ─────────────────────────────────────────────────────────── */
+.mat-badge {
+  display: inline-block; padding: 2px 9px; border-radius: 10px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+}
+.mat-acier { background: #f1f5f9; color: #334155; border: 1px solid #94a3b8; }
+.mat-inox  { background: var(--inox-bg); color: var(--inox-col); border: 1px solid var(--inox-col); }
+.mat-alu   { background: var(--alu-bg); color: var(--alu-col); border: 1px solid var(--alu-col); }
+.mat-other { background: var(--other-bg); color: var(--other-col); border: 1px solid var(--other-col); }
+
+/* ─── Totals grid ────────────────────────────────────────────────────────── */
+.totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px; padding: 16px;
+}
+.total-card {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.total-card.accent-card { background: var(--accent2); border-color: var(--accent3); }
+.total-card.amber-card  { background: var(--amber2);  border-color: #fcd34d; }
+.tl { font-size: 11px; color: var(--fg2); margin-bottom: 4px; font-weight: 600; }
+.tv { font-size: 24px; font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; }
+.total-card.accent-card .tv { color: var(--accent); }
+.total-card.amber-card  .tv { color: var(--amber); }
+.tu { font-size: 13px; color: var(--fg3); }
+
+/* ─── Besoins table ──────────────────────────────────────────────────────── */
+.besoins-table th { background: var(--fg); color: #fff; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .besoins-table th { background: #2a3a55; }
+}
+:root[data-theme="dark"] .besoins-table th { background: #2a3a55; }
+
+/* ─── Plans de découpe ───────────────────────────────────────────────────── */
+.plan-groupe {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden; margin-bottom: 20px;
+}
+.plan-groupe:last-child { margin-bottom: 0; }
+.plan-groupe-header {
+  padding: 10px 16px; font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; gap: 10px; color: #fff;
+}
+.plan-groupe-body { padding: 14px; }
+.canvas-container {
+  background: var(--surface2);
+  border-radius: 6px; padding: 10px;
+  display: flex; justify-content: center;
+  margin-bottom: 10px; overflow-x: auto;
+}
+.plan-canvas { max-width: 100%; height: auto; }
+.stats-mini {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px; margin-top: 10px;
+}
+.stat-box {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 10px;
+}
+.stat-label { font-size: 10px; color: var(--fg3); margin-bottom: 2px; text-transform: uppercase; letter-spacing: .3px; }
+.stat-value { font-size: 16px; font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-color { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+.legend-text { font-size: 11px; color: var(--fg2); font-family: 'JetBrains Mono', monospace; }
+
+/* ─── Section headers in sidebar ────────────────────────────────────────── */
+.sec-label {
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  text-transform: uppercase; letter-spacing: .6px;
+  padding: 6px 0 4px; border-top: 1px solid var(--border);
+  margin-top: 4px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.sec-label:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+
+/* ─── Info box ───────────────────────────────────────────────────────────── */
+.info-box {
+  background: var(--accent2);
+  border: 1px solid var(--accent3);
+  border-radius: 6px; padding: 8px 10px;
+  font-size: 12px; color: var(--fg2); margin-bottom: 8px;
+}
+
+/* ─── Alert ──────────────────────────────────────────────────────────────── */
+.alert-success {
+  background: var(--green2); border: 1.5px solid var(--green);
+  color: var(--green); border-radius: 8px; padding: 10px 14px;
+  font-weight: 600; margin-top: 12px; display: none;
+}
+
+/* ─── Materiaux table ────────────────────────────────────────────────────── */
+.materials-table td, .materials-table th { padding: 7px 8px; }
+
+/* ─── Print ──────────────────────────────────────────────────────────────── */
+@media print {
+  .app-header, .tabs-bar, .sidebar, .header-btns, .no-print { display: none !important; }
+  body { background: white; padding: 0; font-family: Arial, sans-serif; font-size: 9pt; }
+  .main-layout { display: block; padding: 0; }
+  .main-content { padding: 0; }
+  .card { box-shadow: none; border: 1px solid #ddd; margin-bottom: 10px; page-break-inside: avoid; }
+  table { font-size: 8pt; }
+  th, td { padding: 3px 4px; }
+  .plan-canvas { max-width: 100%; border: 1px solid #000; }
+  @page { size: A4 landscape; margin: 12mm; }
+}
+</style>
+
+<!-- APP HEADER -->
+<div class="app-header">
+  <div class="header-inner">
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+    </div>
+    <div>
+      <div class="app-title">Calculateur de Tôlerie</div>
+      <div class="app-sub">Découpe, optimisation &amp; devis — CHF · TVA 8.1%</div>
+    </div>
+    <div class="header-btns no-print">
+      <button class="btn btn-green" onclick="ajouterLigne()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter pièce
+      </button>
+      <button class="btn btn-outline" onclick="dupliquerDerniereLigne()" title="Dupliquer la dernière ligne">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Dupliquer
+      </button>
+      <button class="btn btn-steel" onclick="exporterExcel()">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Exporter xlsx
+      </button>
+      <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importer xlsx
+        <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none;" onchange="importerExcel(event)">
+      </label>
+      <button class="btn btn-primary" onclick="imprimerApp()">
+        <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimer
+      </button>
+      <button class="btn btn-red" onclick="effacerTout()">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Réinitialiser
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TABS BAR -->
+<div class="tabs-bar no-print">
+  <button class="tab-btn active" onclick="switchTab('calc', this)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>Calculateur
+  </button>
+  <button class="tab-btn" onclick="switchTab('mats', this)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Matériaux
+  </button>
+</div>
+
+<!-- ===== TAB CALCULATEUR ===== -->
+<div id="tab-calc" class="tab-pane active">
+<div class="main-layout">
+
+  <!-- ─── SIDEBAR ──────────────────────────────────────────────── -->
+  <div class="sidebar">
+
+    <!-- Identification chantier -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Identification
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>N° chantier</label>
+          <input type="text" id="num-chantier" placeholder="ex: ROLLIET-H1" maxlength="30" oninput="sauvegarderDonnees()">
+        </div>
+        <div class="form-group">
+          <label>Position</label>
+          <input type="text" id="position-chantier" placeholder="ex: Escalier A" maxlength="30" oninput="sauvegarderDonnees()">
+        </div>
+      </div>
+
+      <!-- Panneau chapitres / multiplicateurs -->
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Chapitres &amp; Multiplicateurs
+      </div>
+      <div class="chap-panel" id="chapPanel">
+        <div class="chap-panel-header" onclick="toggleChapPanel()">
+          <span id="chapPanelArrow">▼</span>
+          <span style="flex:1;margin-left:6px;">MULTIPLICATEURS PAR CHAPITRE</span>
+          <button class="btn btn-sm btn-outline" onclick="event.stopPropagation();resetTousMultiplicateurs()" title="Remettre tous à ×1" style="padding:2px 8px;font-size:11px;">✕ Tout ×1</button>
+        </div>
+        <div id="chapGrid" class="chap-panel-body">
+          <div style="font-size:12px;color:var(--fg3);padding:4px 0;">Aucun chapitre défini — ajoutez des chapitres aux pièces</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paramètres par défaut -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Par défaut
+      </div>
+      <div class="form-group">
+        <label>Matériau (nouvelles pièces)</label>
+        <select id="materiau-defaut" onchange="sauvegarderDonnees()"></select>
+      </div>
+      <div class="form-group">
+        <label>Épaisseur par défaut (mm)</label>
+        <select id="epaisseur-defaut" onchange="sauvegarderDonnees()">
+          <option value="0.5">0.5</option><option value="1">1</option><option value="1.5">1.5</option>
+          <option value="2">2</option><option value="2.5">2.5</option><option value="3" selected>3</option>
+          <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+          <option value="8">8</option><option value="10">10</option><option value="12">12</option>
+          <option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option>
+        </select>
+      </div>
+
+      <!-- Tri pièces -->
+      <div class="form-group">
+        <label>Tri de la liste</label>
+        <select id="tri-select" onchange="afficherPieces()">
+          <option value="ordre">Ordre de saisie</option>
+          <option value="chapitre">Par chapitre</option>
+          <option value="matiere">Par matière</option>
+          <option value="epaisseur">Par épaisseur</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Coûts projet -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Coûts projet
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Prix coupe (CHF)</label>
+          <input type="number" id="prix-coupe" value="20" min="0" step="0.01" oninput="calculerTotaux()">
+        </div>
+        <div class="form-group">
+          <label>Nb coupes</label>
+          <input type="number" id="nb-coupes" value="1" min="0" step="1" oninput="calculerTotaux()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Frais divers (CHF)</label>
+          <input type="number" id="frais-divers" value="0" min="0" step="0.01" oninput="calculerTotaux()">
+        </div>
+        <div class="form-group">
+          <label>Tarif horaire (CHF/h)</label>
+          <input type="number" id="tarif-horaire" value="120" min="0" step="1" oninput="calculerTotaux()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Marge (%)</label>
+          <input type="number" id="marge-pct" value="20" min="0" step="1" oninput="calculerTotaux()">
+        </div>
+        <div class="form-group">
+          <label>TVA (%)</label>
+          <input type="number" id="tva-pct" value="8.1" min="0" step="0.1" oninput="calculerTotaux()">
+        </div>
+      </div>
+
+      <div class="sec-label" style="margin-top:6px;">⏱ Main d'œuvre</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Temps / format (min)</label>
+          <input type="number" id="temps-format" value="40" min="0" step="1" oninput="calculerTotaux()">
+        </div>
+        <div class="form-group">
+          <label>Temps / coupe (min)</label>
+          <input type="number" id="temps-coupe" value="3" min="0" step="0.5" oninput="calculerTotaux()">
+        </div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;">
+          <input type="checkbox" id="inclure-mdo" checked onchange="calculerTotaux();sauvegarderDonnees()" style="width:auto;">
+          Inclure main d'œuvre dans le total
+        </label>
+      </div>
+
+      <div class="result-box">
+        <div class="rl">Coût découpe</div>
+        <div class="rv"><span id="cout-decoupe">20.00</span> CHF</div>
+      </div>
+      <div class="result-box">
+        <div class="rl">Coût matière HT</div>
+        <div class="rv"><span id="cout-matiere">0.00</span> CHF</div>
+      </div>
+      <div class="result-box amber-box">
+        <div class="rl">⏱ Main d'œuvre (<span id="temps-travail-calcule">0.00</span> h × <span id="display-tarif">120</span> CHF/h)</div>
+        <div class="rv"><span id="cout-mdo">0.00</span> CHF</div>
+      </div>
+    </div>
+
+    <!-- Format plaques -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+        Format des plaques
+      </div>
+      <div class="form-group">
+        <label>Format standard</label>
+        <select id="format-plaque" onchange="changerFormatPlaque()">
+          <option value="1000x2000">1000 × 2000 mm</option>
+          <option value="1250x2500">1250 × 2500 mm</option>
+          <option value="1500x3000" selected>1500 × 3000 mm</option>
+          <option value="personnalise">Format personnalisé…</option>
+        </select>
+      </div>
+      <div id="format-personnalise" style="display:none;">
+        <div class="form-row">
+          <div class="form-group"><label>Largeur (mm)</label><input type="number" id="plaque-largeur" value="1500" min="100" step="1" oninput="appliquerFormatPersonnalise()"></div>
+          <div class="form-group"><label>Longueur (mm)</label><input type="number" id="plaque-longueur" value="3000" min="100" step="1" oninput="appliquerFormatPersonnalise()"></div>
+        </div>
+      </div>
+      <div class="info-box">Format actuel : <strong id="format-actuel">1500 × 3000 mm</strong></div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- ─── MAIN CONTENT ──────────────────────────────────────────────────── -->
+  <div class="main-content" style="display:flex;flex-direction:column;gap:16px;min-width:0;">
+
+    <!-- Liste des pièces -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:14px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--border);">
+        <div class="card-title" style="margin:0;border:none;padding:0;">
+          <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Liste des pièces
+        </div>
+        <span id="piece-count-badge" style="background:var(--accent);color:#fff;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:700;margin-left:4px;">0 pcs</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:32px;">#</th>
+              <th style="width:55px;">NB</th>
+              <th style="width:140px;">Matière</th>
+              <th style="width:70px;">Ép. (mm)</th>
+              <th style="width:90px;">Long. (mm)</th>
+              <th style="width:90px;">Haut. (mm)</th>
+              <th style="width:140px;">Chapitre</th>
+              <th style="width:130px;">Désignation</th>
+              <th style="width:90px;">Mét.lin.</th>
+              <th style="width:80px;">Surf. m²</th>
+              <th style="width:70px;">Poids kg</th>
+              <th style="width:68px;"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-pieces"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Récapitulatif besoins -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:14px 16px 10px;border-bottom:2px solid var(--border);">
+        <div class="card-title" style="margin:0;border:none;padding:0;">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Récapitulatif des besoins en tôles
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="besoins-table">
+          <thead>
+            <tr>
+              <th>Matière</th><th>Ép.</th><th>Nb pcs</th>
+              <th>Surface brute (m²)</th><th>Plaques néces.</th>
+              <th>Surf. plaques (m²)</th><th>Taux utilisation</th>
+              <th>Poids (kg)</th><th>Coût mat. (CHF)</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-besoins">
+            <tr><td colspan="9" style="text-align:center;color:var(--fg3);padding:20px;">Ajoutez des pièces pour voir le récapitulatif</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Totaux financiers -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:14px 16px 10px;border-bottom:2px solid var(--border);">
+        <div class="card-title" style="margin:0;border:none;padding:0;">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Récapitulatif financier
+        </div>
+      </div>
+      <div class="totals-grid">
+        <div class="total-card"><div class="tl">Surface totale</div><div class="tv"><span id="total-surface">0.00</span> <span class="tu">m²</span></div></div>
+        <div class="total-card"><div class="tl">Poids total</div><div class="tv"><span id="total-poids">0.00</span> <span class="tu">kg</span></div></div>
+        <div class="total-card amber-card">
+          <div class="tl">⏱ Main d'œuvre</div>
+          <div class="tv"><span id="total-cout-mdo">0.00</span> <span class="tu">CHF</span></div>
+          <div style="font-size:11px;color:var(--amber);margin-top:2px;"><span id="total-temps-travail">0.00</span> h × <span id="total-display-tarif">120</span> CHF/h</div>
+        </div>
+        <div class="total-card"><div class="tl">Coût matière HT</div><div class="tv"><span id="total-matiere-ht">0.00</span> <span class="tu">CHF</span></div></div>
+        <div class="total-card accent-card">
+          <div class="tl">Total HT (marge <span id="display-marge">20</span>%)</div>
+          <div class="tv"><span id="total-ht">0.00</span> <span class="tu">CHF</span></div>
+          <div style="font-size:11px;color:var(--fg2);margin-top:2px;">Base : <span id="total-avant-marge">0.00</span> CHF</div>
+        </div>
+        <div class="total-card accent-card">
+          <div class="tl">Total TTC (TVA <span id="display-tva">8.1</span>%)</div>
+          <div class="tv"><span id="total-ttc">0.00</span> <span class="tu">CHF</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plans de découpe -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Plans de découpe — par matière &amp; épaisseur
+      </div>
+      <div id="plans-decoupe-container">
+        <p style="color:var(--fg3);text-align:center;padding:30px;">Ajoutez des pièces pour voir les plans de découpe.</p>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /main-layout -->
+</div><!-- /tab-calc -->
+
+<!-- ===== TAB MATERIAUX ===== -->
+<div id="tab-mats" class="tab-pane" style="padding:16px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));">
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Édition des matériaux
+    </div>
+    <p style="color:var(--fg2);margin-bottom:16px;font-size:13px;">Modifiez les noms, densités et prix. Les modifications s'appliquent immédiatement à toutes les pièces.</p>
+    <div class="alert-success" id="alert-save">✓ Modifications enregistrées avec succès !</div>
+    <div class="table-wrap">
+      <table class="materials-table">
+        <thead>
+          <tr>
+            <th style="width:35%;">Nom du matériau</th>
+            <th style="width:18%;">Famille</th>
+            <th style="width:22%;">Densité (kg/dm³)</th>
+            <th style="width:22%;">Prix (CHF/kg)</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-materiaux"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-green" onclick="sauvegarderMateriaux()">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Enregistrer
+      </button>
+      <button class="btn btn-outline" onclick="reinitialiserMateriaux()">
+        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Réinitialiser par défaut
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+'use strict';
+// ─── ÉTAT GLOBAL ──────────────────────────────────────────────────────────────
+let ligneCount = 0;
+let totalNbPlaques = 0;
+let pieces = [];                  // [{id, nb, matId, ep, long, haut, chapitre, desig}]
+let chapitreMultiplicateurs = {}; // { 'Nom': multiplier }
+let chapPanelOpen = true;
+let chapPanelCollapsed = false;
+
+// ─── MATÉRIAUX ────────────────────────────────────────────────────────────────
+const MATERIAUX_DEFAUT = [
+  { id: 'acier',      nom: 'Tôle brut acier',   famille: 'acier', densite: 7.65, prix: 2   },
+  { id: 'zincor',     nom: 'Tôle zincor',        famille: 'acier', densite: 7.65, prix: 2   },
+  { id: 'inox',       nom: 'Inox',               famille: 'inox',  densite: 7.90, prix: 4.5 },
+  { id: 'inoxbrosse', nom: 'Inox brossé',        famille: 'inox',  densite: 7.65, prix: 4.5 },
+  { id: 'spoinox',    nom: 'SPO inox',            famille: 'inox',  densite: 7.65, prix: 4.5 },
+  { id: 'alubrut',    nom: 'Alu brut',            famille: 'alu',  densite: 2.70, prix: 6.6 },
+  { id: 'alueloxe',   nom: 'Alu eloxé',           famille: 'alu',  densite: 2.70, prix: 6.0 },
+  { id: 'cuivre',     nom: 'Cuivre',              famille: 'other', densite: 8.96, prix: 30  },
+  { id: 'verre',      nom: 'Verre',               famille: 'other', densite: 2.50, prix: 0   }
+];
+const EPAISSEURS_STD = [0.5,1,1.5,2,2.5,3,4,5,6,8,10,12,15,20,25,30];
+let PLAQUE_LARGEUR = 1500, PLAQUE_LONGUEUR = 3000;
+
+const COLORS = ['#ef4444','#f97316','#f59e0b','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6','#6366f1','#8b5cf6','#a855f7','#ec4899'];
+const FAMILLE_COLORS  = { acier:'linear-gradient(135deg,#475569,#64748b)', inox:'linear-gradient(135deg,#0369a1,#0ea5e9)', alu:'linear-gradient(135deg,#b45309,#f59e0b)', other:'linear-gradient(135deg,#7c3aed,#a855f7)' };
+const FAMILLE_BADGE   = { acier:'mat-acier', inox:'mat-inox', alu:'mat-alu', other:'mat-other' };
+
+function chargerMateriaux() {
+  try { const s=localStorage.getItem('materiauxPersonnalises'); return s?JSON.parse(s):MATERIAUX_DEFAUT; } catch(e){ return MATERIAUX_DEFAUT; }
+}
+function getMateriau(id) {
+  const m=chargerMateriaux(); return m.find(x=>x.id===id)||m[0];
+}
+function buildMateriauxOptions(selectedId) {
+  return chargerMateriaux().map(m=>`<option value="${m.id}"${m.id===selectedId?' selected':''}>${m.nom}</option>`).join('');
+}
+function buildEpaisseurOptions(sel) {
+  return EPAISSEURS_STD.map(e=>`<option value="${e}"${parseFloat(e)===parseFloat(sel)?' selected':''}>${e} mm</option>`).join('');
+}
+function initialiserSelecteurDefaut() {
+  const el=document.getElementById('materiau-defaut');
+  el.innerHTML=buildMateriauxOptions(el.value||'acier');
+}
+function initialiserTableauMateriaux() {
+  const tbody=document.getElementById('tbody-materiaux'); tbody.innerHTML='';
+  chargerMateriaux().forEach(mat=>{
+    const row=tbody.insertRow(); row.dataset.id=mat.id;
+    row.innerHTML=`
+      <td><input type="text" class="table-input" value="${mat.nom}"></td>
+      <td><select class="table-select">
+        <option value="acier"${mat.famille==='acier'?' selected':''}>Acier</option>
+        <option value="inox"${mat.famille==='inox'?' selected':''}>Inox</option>
+        <option value="alu"${mat.famille==='alu'?' selected':''}>Aluminium</option>
+        <option value="other"${mat.famille==='other'?' selected':''}>Autre</option>
+      </select></td>
+      <td><input type="number" class="table-input" value="${mat.densite}" min="0" step="0.01"></td>
+      <td><input type="number" class="table-input" value="${mat.prix}" min="0" step="0.01"></td>`;
+  });
+}
+function sauvegarderMateriaux() {
+  const rows=document.getElementById('tbody-materiaux').rows;
+  const mats=[]; for(let i=0;i<rows.length;i++){
+    const r=rows[i];
+    const nom=r.cells[0].querySelector('input').value.trim();
+    const fam=r.cells[1].querySelector('select').value;
+    const den=parseFloat(r.cells[2].querySelector('input').value);
+    const prix=parseFloat(r.cells[3].querySelector('input').value);
+    if(nom&&den>0) mats.push({id:r.dataset.id,nom,famille:fam,densite:den,prix});
+  }
+  try{localStorage.setItem('materiauxPersonnalises',JSON.stringify(mats));}catch(e){}
+  mettreAJourTousSelecteursMateriaux(); recalculerToutesLignes();
+  const a=document.getElementById('alert-save'); a.style.display='block';
+  setTimeout(()=>{a.style.display='none';},3000);
+}
+function reinitialiserMateriaux() {
+  if(!confirm('Réinitialiser tous les matériaux aux valeurs par défaut ?')) return;
+  try{localStorage.removeItem('materiauxPersonnalises');}catch(e){}
+  initialiserTableauMateriaux(); mettreAJourTousSelecteursMateriaux(); recalculerToutesLignes();
+}
+function mettreAJourTousSelecteursMateriaux() {
+  initialiserSelecteurDefaut();
+  const rows=document.getElementById('tbody-pieces').rows;
+  for(let i=0;i<rows.length;i++){
+    const row=rows[i]; if(row.classList.contains('chap-sep-row')) continue;
+    const sel=row.querySelector('.sel-mat'); if(!sel) continue;
+    const cur=sel.value; sel.innerHTML=buildMateriauxOptions(cur);
+  }
+}
+
+// ─── CHAPITRES & MULTIPLICATEURS ──────────────────────────────────────────────
+function _getMultChap(nom) { return nom&&chapitreMultiplicateurs[nom]?chapitreMultiplicateurs[nom]:1; }
+function toggleChapPanel() {
+  chapPanelCollapsed=!chapPanelCollapsed;
+  document.getElementById('chapGrid').style.display=chapPanelCollapsed?'none':'block';
+  document.getElementById('chapPanelArrow').textContent=chapPanelCollapsed?'▶':'▼';
+}
+function resetTousMultiplicateurs() {
+  chapitreMultiplicateurs={};
+  refreshChapPanel(); dessinerPlanDecoupe();
+}
+function setMultiplicateur(nom,val) {
+  val=Math.max(1,parseInt(val)||1);
+  if(val===1) delete chapitreMultiplicateurs[nom];
+  else chapitreMultiplicateurs[nom]=val;
+  dessinerPlanDecoupe(); calculerTotaux();
+}
+function refreshChapPanel() {
+  const grid=document.getElementById('chapGrid');
+  // Collect unique chapters from pieces data
+  const chapitres=[...new Set(pieces.map(p=>p.chapitre||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr',{numeric:true}));
+  if(!chapitres.length){
+    grid.innerHTML='<div style="font-size:12px;color:var(--fg3);padding:4px 0;">Aucun chapitre — ajoutez des chapitres aux pièces</div>';
+    return;
+  }
+  grid.innerHTML=chapitres.map(ch=>{
+    const mult=_getMultChap(ch);
+    const nbPcs=pieces.filter(p=>p.chapitre===ch).reduce((s,p)=>s+p.nb,0);
+    return `<div class="chap-row">
+      <span class="chap-row-name">📁 ${ch} <span style="font-size:10px;color:var(--fg3);">${nbPcs} pcs</span></span>
+      <span style="font-size:11px;color:var(--fg3);">×</span>
+      <input type="number" class="table-input chap-mult-input" value="${mult}" min="1" max="999"
+        oninput="setMultiplicateur('${ch.replace(/'/g,"\\'")}', this.value)"
+        title="Multiplicateur pour le chapitre ${ch}">
+      ${mult>1?`<span class="chap-badge" title="${nbPcs*mult} pcs effectives">= ${nbPcs*mult}</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ─── ONGLETS ──────────────────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── FORMAT PLAQUE ────────────────────────────────────────────────────────────
+function changerFormatPlaque() {
+  const val=document.getElementById('format-plaque').value;
+  if(val==='personnalise'){
+    document.getElementById('format-personnalise').style.display='block';
+    PLAQUE_LARGEUR=parseInt(document.getElementById('plaque-largeur').value);
+    PLAQUE_LONGUEUR=parseInt(document.getElementById('plaque-longueur').value);
+  } else {
+    document.getElementById('format-personnalise').style.display='none';
+    const [l,lo]=val.split('x').map(Number);
+    PLAQUE_LARGEUR=l; PLAQUE_LONGUEUR=lo;
+    document.getElementById('plaque-largeur').value=l;
+    document.getElementById('plaque-longueur').value=lo;
+  }
+  document.getElementById('format-actuel').textContent=`${PLAQUE_LARGEUR} × ${PLAQUE_LONGUEUR} mm`;
+  dessinerPlanDecoupe(); sauvegarderDonnees();
+}
+function appliquerFormatPersonnalise() {
+  PLAQUE_LARGEUR=parseInt(document.getElementById('plaque-largeur').value)||1500;
+  PLAQUE_LONGUEUR=parseInt(document.getElementById('plaque-longueur').value)||3000;
+  document.getElementById('format-actuel').textContent=`${PLAQUE_LARGEUR} × ${PLAQUE_LONGUEUR} mm`;
+  dessinerPlanDecoupe(); sauvegarderDonnees();
+}
+
+// ─── LIGNES / TABLEAU ─────────────────────────────────────────────────────────
+function ajouterLigne(defData) {
+  ligneCount++;
+  const p = defData || {
+    id: ligneCount,
+    nb: 1,
+    matId: document.getElementById('materiau-defaut').value || 'acier',
+    ep: parseFloat(document.getElementById('epaisseur-defaut').value) || 3,
+    long: 0, haut: 0, chapitre: '', desig: ''
+  };
+  if(!defData) p.id=ligneCount;
+  pieces.push(p);
+  afficherPieces();
+  calculerTotaux();
+}
+
+function dupliquerDerniereLigne() {
+  if(!pieces.length) return;
+  const last=pieces[pieces.length-1];
+  ligneCount++;
+  pieces.push({...last, id:ligneCount});
+  afficherPieces();
+  calculerTotaux();
+  sauvegarderDonnees();
+}
+
+function supprimerLigne(idx) {
+  pieces.splice(idx,1);
+  afficherPieces(); calculerTotaux(); sauvegarderDonnees(); dessinerPlanDecoupe();
+}
+
+function recalculerToutesLignes() {
+  afficherPieces(); dessinerPlanDecoupe(); calculerTotaux();
+}
+
+function afficherPieces() {
+  const tri=document.getElementById('tri-select').value;
+  let indexed=pieces.map((p,i)=>({...p,_i:i}));
+
+  if(tri==='chapitre') indexed.sort((a,b)=>(a.chapitre||'').localeCompare(b.chapitre||'','fr',{numeric:true}));
+  else if(tri==='matiere') indexed.sort((a,b)=>{const ma=getMateriau(a.matId),mb=getMateriau(b.matId);return ma.nom.localeCompare(mb.nom,'fr');});
+  else if(tri==='epaisseur') indexed.sort((a,b)=>a.ep-b.ep);
+
+  const tbody=document.getElementById('tbody-pieces');
+  tbody.innerHTML='';
+
+  let prevChap=undefined;
+  indexed.forEach((p,posIdx)=>{
+    // Séparateur chapitre
+    if(tri==='chapitre'||(tri!=='ordre'&&indexed.some(x=>x.chapitre))){
+      const chapCourant=p.chapitre||'';
+      if(chapCourant!==prevChap){
+        const sepRow=tbody.insertRow();
+        sepRow.className='chap-sep-row';
+        const mult=_getMultChap(chapCourant);
+        const nbPcs=indexed.filter(x=>(x.chapitre||'')===chapCourant).reduce((s,x)=>s+x.nb,0);
+        const multBadge=mult>1?`<span class="chap-badge" style="margin-left:6px;">×${mult} = ${nbPcs*mult} pcs eff.</span>`:'';
+        const label=chapCourant
+          ?`📁 ${chapCourant}${multBadge} <span style="font-size:11px;color:var(--fg3);font-weight:400;margin-left:6px;">${indexed.filter(x=>(x.chapitre||'')===chapCourant).length} pos.</span>`
+          :`<span style="color:var(--fg3);">— sans chapitre —</span>`;
+        const td=document.createElement('td');
+        td.colSpan=12; td.innerHTML=label;
+        sepRow.appendChild(td);
+        prevChap=chapCourant;
+      }
+    }
+
+    // Ligne pièce
+    const row=tbody.insertRow();
+    row.dataset.idx=p._i;
+    const mat=getMateriau(p.matId);
+    const multEff=_getMultChap(p.chapitre);
+    const nbEff=p.nb*multEff;
+    const metrageLineaire=((p.long+p.haut)*2*nbEff).toFixed(1);
+    const surface=((p.long*p.haut*nbEff)/1e6).toFixed(4);
+    const poids=((p.long*p.haut*nbEff)/1e6*p.ep*mat.densite).toFixed(3);
+
+    row.innerHTML=`
+      <td style="font-weight:700;color:var(--accent);text-align:center;font-family:'JetBrains Mono',monospace;">${posIdx+1}</td>
+      <td><input type="number" class="table-input" value="${p.nb}" min="1"
+            oninput="pieces[${p._i}].nb=parseInt(this.value)||1;refreshRow(this.closest('tr'));sauvegarderDonnees();"></td>
+      <td><select class="table-select sel-mat"
+            onchange="pieces[${p._i}].matId=this.value;refreshRow(this.closest('tr'));sauvegarderDonnees();">
+            ${buildMateriauxOptions(p.matId)}
+          </select></td>
+      <td><select class="table-select"
+            onchange="pieces[${p._i}].ep=parseFloat(this.value);refreshRow(this.closest('tr'));sauvegarderDonnees();">
+            ${buildEpaisseurOptions(p.ep)}
+          </select></td>
+      <td><input type="number" class="table-input" value="${p.long}" min="0" step="0.1"
+            oninput="pieces[${p._i}].long=parseFloat(this.value)||0;refreshRow(this.closest('tr'));sauvegarderDonnees();"></td>
+      <td><input type="number" class="table-input" value="${p.haut}" min="0" step="0.1"
+            oninput="pieces[${p._i}].haut=parseFloat(this.value)||0;refreshRow(this.closest('tr'));sauvegarderDonnees();"></td>
+      <td><input type="text" class="table-input" value="${p.chapitre||''}" placeholder="Chapitre…" maxlength="40"
+            oninput="pieces[${p._i}].chapitre=this.value.trim();refreshChapPanel();sauvegarderDonnees();"
+            onblur="dessinerPlanDecoupe();calculerTotaux();"></td>
+      <td><input type="text" class="table-input" value="${p.desig||''}" placeholder="Note…" maxlength="50"
+            oninput="pieces[${p._i}].desig=this.value;sauvegarderDonnees();"></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--fg2);"
+          data-metlin="${metrageLineaire}">${metrageLineaire}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--fg2);"
+          data-surf="${surface}">${surface}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--fg2);"
+          data-poids="${poids}">${poids}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-sm btn-outline" title="Dupliquer" onclick="dupliquerLigne(${p._i})" style="margin-right:3px;">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button class="btn btn-sm btn-red" title="Supprimer" onclick="supprimerLigne(${p._i})">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </td>`;
+  });
+
+  // Badge compteur
+  const total=pieces.reduce((s,p)=>s+p.nb*_getMultChap(p.chapitre),0);
+  document.getElementById('piece-count-badge').textContent=`${total} pcs`;
+}
+
+function dupliquerLigne(idx) {
+  ligneCount++;
+  pieces.splice(idx+1,0,{...pieces[idx],id:ligneCount});
+  afficherPieces(); calculerTotaux(); sauvegarderDonnees(); dessinerPlanDecoupe();
+}
+
+function refreshRow(row) {
+  const idx=parseInt(row.dataset.idx);
+  const p=pieces[idx];
+  if(!p) return;
+  const mat=getMateriau(p.matId);
+  const multEff=_getMultChap(p.chapitre);
+  const nbEff=p.nb*multEff;
+  const metrageLineaire=((p.long+p.haut)*2*nbEff).toFixed(1);
+  const surface=((p.long*p.haut*nbEff)/1e6).toFixed(4);
+  const poids=((p.long*p.haut*nbEff)/1e6*p.ep*mat.densite).toFixed(3);
+  const cells=row.cells;
+  const colMet=cells[8], colSurf=cells[9], colPoids=cells[10];
+  colMet.textContent=metrageLineaire; colMet.dataset.metlin=metrageLineaire;
+  colSurf.textContent=surface;   colSurf.dataset.surf=surface;
+  colPoids.textContent=poids;    colPoids.dataset.poids=poids;
+  calculerTotaux();
+  dessinerPlanDecoupe();
+}
+
+function effacerTout() {
+  if(!confirm('Réinitialiser toutes les données ?')) return;
+  pieces=[]; ligneCount=0; chapitreMultiplicateurs={};
+  try{localStorage.removeItem('calculateurTolerie');}catch(e){}
+  afficherPieces(); refreshChapPanel(); calculerTotaux(); dessinerPlanDecoupe();
+}
+
+// ─── CALCUL TOTAUX ────────────────────────────────────────────────────────────
+function calculerTotaux() {
+  let totalSurface=0, totalPoids=0, totalCoutMatiere=0, nbPiecesTotales=0;
+
+  pieces.forEach(p=>{
+    const mat=getMateriau(p.matId);
+    const multEff=_getMultChap(p.chapitre);
+    const nbEff=p.nb*multEff;
+    const surface=(p.long*p.haut*nbEff)/1e6;
+    const poids=surface*p.ep*mat.densite;
+    totalSurface+=surface;
+    totalPoids+=poids;
+    totalCoutMatiere+=poids*mat.prix;
+    nbPiecesTotales+=nbEff;
+  });
+
+  const prixCoupe=parseFloat(document.getElementById('prix-coupe').value)||0;
+  const nbCoupes=parseFloat(document.getElementById('nb-coupes').value)||0;
+  const coutDecoupe=prixCoupe*nbCoupes;
+  const coutMatiereTot=totalCoutMatiere+coutDecoupe;
+
+  const tempsFormat=parseFloat(document.getElementById('temps-format').value)||0;
+  const tempsCoupe=parseFloat(document.getElementById('temps-coupe').value)||0;
+  const tempsMin=(totalNbPlaques*tempsFormat)+(nbPiecesTotales*tempsCoupe);
+  const tempsH=tempsMin/60;
+  const tarif=parseFloat(document.getElementById('tarif-horaire').value)||0;
+  const coutMdo=tempsH*tarif;
+  const frais=parseFloat(document.getElementById('frais-divers').value)||0;
+  const inclureMdo=document.getElementById('inclure-mdo').checked;
+  const coutMdoInc=inclureMdo?coutMdo:0;
+  const margePct=(parseFloat(document.getElementById('marge-pct').value)||20)/100;
+  const tvaPct=(parseFloat(document.getElementById('tva-pct').value)||8.1)/100;
+
+  const totalMatiereHT=coutMatiereTot;
+  const totalAvantMarge=totalMatiereHT+coutMdoInc+frais;
+  const totalHT=(totalMatiereHT*(1+margePct))+coutMdoInc+frais;
+  const totalTTC=totalHT*(1+tvaPct);
+
+  const f=v=>v.toFixed(2);
+  const s=id=>document.getElementById(id);
+  s('cout-decoupe').textContent=f(coutDecoupe);
+  s('cout-matiere').textContent=f(coutMatiereTot);
+  s('temps-travail-calcule').textContent=tempsH.toFixed(2);
+  s('display-tarif').textContent=tarif.toFixed(0);
+  s('cout-mdo').textContent=f(coutMdo);
+  s('total-temps-travail').textContent=tempsH.toFixed(2);
+  s('total-display-tarif').textContent=tarif.toFixed(0);
+  s('total-cout-mdo').textContent=f(coutMdo);
+  s('total-surface').textContent=totalSurface.toFixed(4);
+  s('total-poids').textContent=totalPoids.toFixed(3);
+  s('total-matiere-ht').textContent=f(totalMatiereHT);
+  s('total-avant-marge').textContent=f(totalAvantMarge);
+  s('total-ht').textContent=f(totalHT);
+  s('total-ttc').textContent=f(totalTTC);
+  s('display-marge').textContent=(margePct*100).toFixed(0);
+  s('display-tva').textContent=(tvaPct*100).toFixed(1);
+}
+
+// ─── BIN PACKING ──────────────────────────────────────────────────────────────
+function binPacking(pcs) {
+  const plaques=[], aplacer=[...pcs];
+  aplacer.sort((a,b)=>(b.longueur*b.largeur)-(a.longueur*a.largeur));
+  while(aplacer.length>0){
+    const plaque={pieces:[],espaces:[{x:0,y:0,w:PLAQUE_LARGEUR,h:PLAQUE_LONGUEUR}]};
+    let continuer=true;
+    while(continuer&&aplacer.length>0){
+      continuer=false;
+      for(let i=0;i<aplacer.length;i++){
+        const p=aplacer[i];
+        const orients=[{pw:p.longueur,ph:p.largeur,rot:false},{pw:p.largeur,ph:p.longueur,rot:true}];
+        let best=null,bestEi=-1;
+        for(let ei=0;ei<plaque.espaces.length;ei++){
+          const esp=plaque.espaces[ei];
+          for(const o of orients){
+            if(o.pw<=esp.w&&o.ph<=esp.h){
+              const score=(esp.w-o.pw)+(esp.h-o.ph);
+              if(best===null||score<best.score){best={x:esp.x,y:esp.y,pw:o.pw,ph:o.ph,rot:o.rot,score};bestEi=ei;}
+            }
+          }
+        }
+        if(best!==null){
+          p.x=best.x;p.y=best.y;p.pw=best.pw;p.ph=best.ph;p.rot=best.rot;
+          plaque.pieces.push(p);
+          const esp=plaque.espaces[bestEi];
+          plaque.espaces.splice(bestEi,1);
+          if(esp.w>best.pw) plaque.espaces.push({x:esp.x+best.pw,y:esp.y,w:esp.w-best.pw,h:best.ph});
+          if(esp.h>best.ph) plaque.espaces.push({x:esp.x,y:esp.y+best.ph,w:esp.w,h:esp.h-best.ph});
+          plaque.espaces.sort((a,b)=>(b.w*b.h)-(a.w*a.h));
+          aplacer.splice(i,1); continuer=true; break;
+        }
+      }
+    }
+    if(plaque.pieces.length>0) plaques.push(plaque);
+    if(aplacer.length>0&&plaque.pieces.length===0) break;
+  }
+  return plaques;
+}
+
+// ─── PLANS DE DÉCOUPE ─────────────────────────────────────────────────────────
+function dessinerPlanDecoupe() {
+  const container=document.getElementById('plans-decoupe-container');
+  const tbodyBesoins=document.getElementById('tbody-besoins');
+
+  // Grouper par matId|ep, en tenant compte des multiplicateurs
+  const groupes={};
+  pieces.forEach((p,i)=>{
+    if(p.long<=0||p.haut<=0||p.nb<=0) return;
+    const mat=getMateriau(p.matId);
+    const multEff=_getMultChap(p.chapitre);
+    const nbEff=p.nb*multEff;
+    const key=p.matId+'|'+p.ep;
+    if(!groupes[key]) groupes[key]={mat,epaisseur:p.ep,matId:p.matId,pieces:[]};
+    for(let j=0;j<nbEff;j++) groupes[key].pieces.push({id:i+1,longueur:p.long,largeur:p.haut,couleur:COLORS[i%COLORS.length]});
+  });
+
+  const keys=Object.keys(groupes);
+  if(!keys.length){
+    container.innerHTML='<p style="color:var(--fg3);text-align:center;padding:30px;">Ajoutez des pièces pour voir les plans de découpe.</p>';
+    tbodyBesoins.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--fg3);padding:20px;">Ajoutez des pièces pour voir le récapitulatif</td></tr>';
+    totalNbPlaques=0; calculerTotaux(); return;
+  }
+
+  container.innerHTML=''; tbodyBesoins.innerHTML=''; totalNbPlaques=0;
+
+  keys.forEach(key=>{
+    const g=groupes[key];
+    const plaques=binPacking(g.pieces);
+    const nbPlaques=plaques.length;
+    totalNbPlaques+=nbPlaques;
+    const surfacePlaque=(PLAQUE_LARGEUR*PLAQUE_LONGUEUR)/1e6;
+    const surfacePlaques=nbPlaques*surfacePlaque;
+    const surfaceUtilisee=g.pieces.reduce((s,p)=>s+(p.longueur*p.largeur)/1e6,0);
+    const taux=surfacePlaques>0?(surfaceUtilisee/surfacePlaques*100).toFixed(1):0;
+    const poidsTot=surfaceUtilisee*g.epaisseur*g.mat.densite;
+    const coutMat=poidsTot*g.mat.prix;
+    const famille=g.mat.famille||'other';
+
+    // Ligne récap besoins
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="mat-badge ${FAMILLE_BADGE[famille]}">${g.mat.nom}</span></td>
+      <td style="text-align:center;font-weight:700;">${g.epaisseur} mm</td>
+      <td style="text-align:center;">${g.pieces.length}</td>
+      <td style="text-align:center;font-family:'JetBrains Mono',monospace;">${surfaceUtilisee.toFixed(3)}</td>
+      <td style="text-align:center;font-weight:700;color:var(--accent);">${nbPlaques}</td>
+      <td style="text-align:center;font-family:'JetBrains Mono',monospace;">${surfacePlaques.toFixed(2)}</td>
+      <td style="text-align:center;font-weight:600;color:${taux>=80?'var(--green)':taux>=60?'var(--amber)':'var(--red)'};">${taux}%</td>
+      <td style="text-align:center;font-family:'JetBrains Mono',monospace;">${poidsTot.toFixed(2)}</td>
+      <td style="text-align:center;font-weight:700;font-family:'JetBrains Mono',monospace;">${coutMat.toFixed(2)}</td>`;
+    tbodyBesoins.appendChild(tr);
+
+    // Section plan
+    const section=document.createElement('div');
+    section.className='plan-groupe';
+    const header=document.createElement('div');
+    header.className='plan-groupe-header';
+    header.style.background=FAMILLE_COLORS[famille]||FAMILLE_COLORS.other;
+    header.innerHTML=`
+      <span class="mat-badge ${FAMILLE_BADGE[famille]}">${g.mat.nom}</span>
+      <span>Ép. ${g.epaisseur} mm</span>
+      <span style="margin-left:auto;opacity:.9;font-size:13px;">${nbPlaques} plaque(s) · ${g.pieces.length} pcs · ${taux}%</span>`;
+    section.appendChild(header);
+
+    const body=document.createElement('div');
+    body.className='plan-groupe-body';
+
+    // Canvas
+    const scale=0.08;
+    const wP=PLAQUE_LARGEUR*scale, hP=PLAQUE_LONGUEUR*scale;
+    const cols=2, lignes=Math.ceil(plaques.length/cols);
+    const margin=10, espH=14, espV=14;
+    const canvas=document.createElement('canvas');
+    canvas.className='plan-canvas';
+    canvas.width=cols*wP+(cols+1)*margin+(cols-1)*espH;
+    canvas.height=lignes*hP+(lignes+1)*margin+(lignes-1)*espV;
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    plaques.forEach((plaque,idx)=>{
+      const col=idx%cols, lig=Math.floor(idx/cols);
+      const ox=margin+col*(wP+margin+espH), oy=margin+lig*(hP+margin+espV);
+      ctx.fillStyle='#e8edf5';
+      ctx.fillRect(ox,oy,wP,hP);
+      ctx.strokeStyle='#334155'; ctx.lineWidth=2;
+      ctx.strokeRect(ox,oy,wP,hP);
+      const su=plaque.pieces.reduce((s,p)=>s+(p.pw*p.ph)/1e6,0);
+      const tp=(su/surfacePlaque*100).toFixed(1);
+      ctx.fillStyle='#334155'; ctx.font='bold 8px monospace';
+      ctx.textAlign='left';
+      ctx.fillText(`P${idx+1}  (${plaque.pieces.length} pcs — ${tp}%)`,ox,oy-3);
+      plaque.pieces.forEach(p=>{
+        ctx.fillStyle=p.couleur+'cc';
+        ctx.fillRect(ox+p.x*scale,oy+p.y*scale,p.pw*scale,p.ph*scale);
+        ctx.strokeStyle='#000'; ctx.lineWidth=0.5;
+        ctx.strokeRect(ox+p.x*scale,oy+p.y*scale,p.pw*scale,p.ph*scale);
+        if(p.pw*scale>14&&p.ph*scale>11){
+          ctx.fillStyle='#fff'; ctx.font='bold 7px monospace';
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(p.rot?`${p.id}↻`:`${p.id}`,ox+p.x*scale+p.pw*scale/2,oy+p.y*scale+p.ph*scale/2);
+        }
+      });
+    });
+
+    const wrap=document.createElement('div'); wrap.className='canvas-container';
+    wrap.appendChild(canvas); body.appendChild(wrap);
+
+    // Stats mini
+    const statsDiv=document.createElement('div'); statsDiv.className='stats-mini';
+    statsDiv.innerHTML=`
+      <div class="stat-box"><div class="stat-label">Plaques ${PLAQUE_LARGEUR}×${PLAQUE_LONGUEUR}</div><div class="stat-value">${nbPlaques}</div></div>
+      <div class="stat-box"><div class="stat-label">Utilisation</div><div class="stat-value">${taux}%</div></div>
+      <div class="stat-box"><div class="stat-label">Surface nette</div><div class="stat-value">${surfaceUtilisee.toFixed(2)} m²</div></div>
+      <div class="stat-box"><div class="stat-label">Chutes</div><div class="stat-value">${(surfacePlaques-surfaceUtilisee).toFixed(2)} m²</div></div>
+      <div class="stat-box"><div class="stat-label">Poids</div><div class="stat-value">${poidsTot.toFixed(2)} kg</div></div>
+      <div class="stat-box"><div class="stat-label">Coût mat.</div><div class="stat-value">${coutMat.toFixed(2)} CHF</div></div>`;
+    body.appendChild(statsDiv);
+
+    // Légende
+    const legend=document.createElement('div'); legend.className='legend';
+    const uniques={};
+    g.pieces.forEach(p=>{if(!uniques[p.id]) uniques[p.id]=p;});
+    Object.values(uniques).forEach(p=>{
+      const li=document.createElement('div'); li.className='legend-item';
+      li.innerHTML=`<div class="legend-color" style="background:${p.couleur};border:1px solid #0003;"></div><div class="legend-text">Pièce ${p.id} — ${p.longueur}×${p.largeur} mm</div>`;
+      legend.appendChild(li);
+    });
+    body.appendChild(legend);
+    section.appendChild(body);
+    container.appendChild(section);
+  });
+
+  calculerTotaux();
+}
+
+// ─── SAUVEGARDE / CHARGEMENT ──────────────────────────────────────────────────
+function sauvegarderDonnees() {
+  const d={
+    materiau_defaut: document.getElementById('materiau-defaut').value,
+    epaisseur_defaut: document.getElementById('epaisseur-defaut').value,
+    numChantier: document.getElementById('num-chantier').value,
+    positionChantier: document.getElementById('position-chantier').value,
+    prixCoupe:   document.getElementById('prix-coupe').value,
+    nbCoupes:    document.getElementById('nb-coupes').value,
+    fraisDivers: document.getElementById('frais-divers').value,
+    tarifHoraire:document.getElementById('tarif-horaire').value,
+    tempsFormat: document.getElementById('temps-format').value,
+    tempsCoupe:  document.getElementById('temps-coupe').value,
+    margePct:    document.getElementById('marge-pct').value,
+    tvaPct:      document.getElementById('tva-pct').value,
+    inclureMdo:  document.getElementById('inclure-mdo').checked,
+    formatPlaque:{ type:document.getElementById('format-plaque').value, largeur:PLAQUE_LARGEUR, longueur:PLAQUE_LONGUEUR },
+    chapitreMultiplicateurs,
+    pieces
+  };
+  try{localStorage.setItem('calculateurTolerie',JSON.stringify(d));}catch(e){}
+}
+
+function chargerDonnees() {
+  let raw; try{raw=localStorage.getItem('calculateurTolerie');}catch(e){return;}
+  if(!raw) return;
+  let d; try{d=JSON.parse(raw);}catch(e){return;}
+  const s=id=>document.getElementById(id);
+  if(d.numChantier)      s('num-chantier').value=d.numChantier;
+  if(d.positionChantier) s('position-chantier').value=d.positionChantier;
+  if(d.prixCoupe)        s('prix-coupe').value=d.prixCoupe;
+  if(d.nbCoupes)         s('nb-coupes').value=d.nbCoupes;
+  if(d.fraisDivers)      s('frais-divers').value=d.fraisDivers;
+  if(d.tarifHoraire)     s('tarif-horaire').value=d.tarifHoraire;
+  if(d.tempsFormat)      s('temps-format').value=d.tempsFormat;
+  if(d.tempsCoupe)       s('temps-coupe').value=d.tempsCoupe;
+  if(d.margePct!==undefined) s('marge-pct').value=d.margePct;
+  if(d.tvaPct!==undefined)   s('tva-pct').value=d.tvaPct;
+  if(d.inclureMdo!==undefined) s('inclure-mdo').checked=d.inclureMdo;
+  if(d.materiau_defaut){
+    const sel=s('materiau-defaut');
+    if([...sel.options].some(o=>o.value===d.materiau_defaut)) sel.value=d.materiau_defaut;
+  }
+  if(d.epaisseur_defaut) s('epaisseur-defaut').value=d.epaisseur_defaut;
+  if(d.formatPlaque){
+    PLAQUE_LARGEUR=d.formatPlaque.largeur||1500;
+    PLAQUE_LONGUEUR=d.formatPlaque.longueur||3000;
+    const sel=s('format-plaque');
+    sel.value=d.formatPlaque.type||'1500x3000';
+    if(d.formatPlaque.type==='personnalise'){
+      s('format-personnalise').style.display='block';
+      s('plaque-largeur').value=PLAQUE_LARGEUR;
+      s('plaque-longueur').value=PLAQUE_LONGUEUR;
+    }
+    s('format-actuel').textContent=`${PLAQUE_LARGEUR} × ${PLAQUE_LONGUEUR} mm`;
+  }
+  if(d.chapitreMultiplicateurs) chapitreMultiplicateurs=d.chapitreMultiplicateurs;
+  if(d.pieces&&Array.isArray(d.pieces)&&d.pieces.length){
+    pieces=d.pieces;
+    ligneCount=pieces.length;
+  }
+}
+
+// ─── IMPRESSION ───────────────────────────────────────────────────────────────
+function imprimerApp() {
+  window.print();
+}
+
+// ─── EXPORT EXCEL ─────────────────────────────────────────────────────────────
+function exporterExcel() {
+  if(!pieces.length){alert('Aucune pièce à exporter.');return;}
+  const numChantier=document.getElementById('num-chantier').value.trim();
+  const posChantier=document.getElementById('position-chantier').value.trim();
+
+  // Feuille 1 : Paramètres
+  const projet=[
+    {'Paramètre':'N° de chantier','Valeur':numChantier},
+    {'Paramètre':'Position','Valeur':posChantier},
+    {'Paramètre':'Format plaque largeur (mm)','Valeur':PLAQUE_LARGEUR},
+    {'Paramètre':'Format plaque longueur (mm)','Valeur':PLAQUE_LONGUEUR},
+    {'Paramètre':'Prix de coupe (CHF)','Valeur':parseFloat(document.getElementById('prix-coupe').value)||0},
+    {'Paramètre':'Nombre de coupes','Valeur':parseFloat(document.getElementById('nb-coupes').value)||0},
+    {'Paramètre':'Frais divers (CHF)','Valeur':parseFloat(document.getElementById('frais-divers').value)||0},
+    {'Paramètre':'Tarif horaire (CHF/h)','Valeur':parseFloat(document.getElementById('tarif-horaire').value)||0},
+    {'Paramètre':'Temps par format (min)','Valeur':parseFloat(document.getElementById('temps-format').value)||0},
+    {'Paramètre':'Temps par coupe (min)','Valeur':parseFloat(document.getElementById('temps-coupe').value)||0},
+    {'Paramètre':'Marge (%)','Valeur':parseFloat(document.getElementById('marge-pct').value)||20},
+    {'Paramètre':'TVA (%)','Valeur':parseFloat(document.getElementById('tva-pct').value)||8.1},
+    {'Paramètre':'Inclure main d\'œuvre','Valeur':document.getElementById('inclure-mdo').checked?'Oui':'Non'}
+  ];
+  const wsProjet=XLSX.utils.json_to_sheet(projet);
+  wsProjet['!cols']=[{wch:30},{wch:15}];
+
+  // Feuille 2 : Pièces
+  const pcsData=pieces.map((p,i)=>{
+    const mat=getMateriau(p.matId);
+    const multEff=_getMultChap(p.chapitre);
+    const nbEff=p.nb*multEff;
+    const surface=(p.long*p.haut*nbEff)/1e6;
+    const poids=surface*p.ep*mat.densite;
+    return {
+      'N°':i+1, 'Chapitre':p.chapitre||'', 'Désignation':p.desig||'',
+      'NB Pièces':p.nb, 'Mult. chapitre':multEff, 'NB eff.':nbEff,
+      'Matière':mat.nom, 'Famille':mat.famille, 'Épaisseur (mm)':p.ep,
+      'Longueur (mm)':p.long, 'Hauteur (mm)':p.haut,
+      'Surface (m²)':parseFloat(surface.toFixed(4)),
+      'Poids (kg)':parseFloat(poids.toFixed(3)),
+      'Prix/kg (CHF)':mat.prix,
+      'Coût mat. (CHF)':parseFloat((poids*mat.prix).toFixed(2))
+    };
+  });
+  const wsPieces=XLSX.utils.json_to_sheet(pcsData);
+  wsPieces['!cols']=[{wch:4},{wch:16},{wch:20},{wch:10},{wch:12},{wch:8},{wch:18},{wch:10},{wch:12},{wch:12},{wch:12},{wch:14},{wch:11},{wch:12},{wch:14}];
+
+  // Feuille 3 : Récap par groupe
+  const groupes={};
+  pieces.forEach(p=>{
+    const mat=getMateriau(p.matId);
+    const multEff=_getMultChap(p.chapitre);
+    const nbEff=p.nb*multEff;
+    const key=p.matId+'|'+p.ep;
+    if(!groupes[key]) groupes[key]={nom:mat.nom,famille:mat.famille,ep:p.ep,mat,nbPieces:0,surface:0,poids:0};
+    groupes[key].nbPieces+=nbEff;
+    groupes[key].surface+=(p.long*p.haut*nbEff)/1e6;
+    groupes[key].poids+=(p.long*p.haut*nbEff)/1e6*p.ep*mat.densite;
+  });
+  const surfacePlaque=(PLAQUE_LARGEUR*PLAQUE_LONGUEUR)/1e6;
+  const recap=Object.values(groupes).map(g=>{
+    const nbPlaques=Math.ceil(g.surface/surfacePlaque);
+    return {
+      'Matière':g.nom,'Famille':g.famille,'Épaisseur (mm)':g.ep,
+      'Nb pièces eff.':g.nbPieces,
+      'Surface pièces (m²)':parseFloat(g.surface.toFixed(4)),
+      'Plaques nécessaires':nbPlaques,
+      'Surface plaques (m²)':parseFloat((nbPlaques*surfacePlaque).toFixed(2)),
+      'Taux utilisation (%)':parseFloat((g.surface/(nbPlaques*surfacePlaque)*100).toFixed(1)),
+      'Poids total (kg)':parseFloat(g.poids.toFixed(3)),
+      'Prix/kg (CHF)':g.mat.prix,
+      'Coût matière (CHF)':parseFloat((g.poids*g.mat.prix).toFixed(2))
+    };
+  });
+  const wsRecap=XLSX.utils.json_to_sheet(recap);
+  wsRecap['!cols']=[{wch:18},{wch:10},{wch:14},{wch:14},{wch:18},{wch:18},{wch:18},{wch:18},{wch:14},{wch:12},{wch:16}];
+
+  // Chapitres multiplicateurs
+  const chapRows=Object.entries(chapitreMultiplicateurs).map(([nom,mult])=>({'Chapitre':nom,'Multiplicateur':mult}));
+  if(chapRows.length){
+    const wsChap=XLSX.utils.json_to_sheet(chapRows);
+    wsChap['!cols']=[{wch:25},{wch:15}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,wsProjet,'Paramètres');
+    XLSX.utils.book_append_sheet(wb,wsPieces,'Pièces');
+    XLSX.utils.book_append_sheet(wb,wsRecap,'Récapitulatif');
+    XLSX.utils.book_append_sheet(wb,wsChap,'Chapitres');
+    const date=new Date().toISOString().split('T')[0];
+    let nom=numChantier||(posChantier?'tolerie_'+posChantier:'tolerie');
+    if(posChantier&&numChantier) nom+=`_${posChantier}`;
+    XLSX.writeFile(wb,`${nom}_${date}.xlsx`);
+  } else {
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,wsProjet,'Paramètres');
+    XLSX.utils.book_append_sheet(wb,wsPieces,'Pièces');
+    XLSX.utils.book_append_sheet(wb,wsRecap,'Récapitulatif');
+    const date=new Date().toISOString().split('T')[0];
+    let nom=numChantier||(posChantier?'tolerie_'+posChantier:'tolerie');
+    XLSX.writeFile(wb,`${nom}_${date}.xlsx`);
+  }
+}
+
+// ─── IMPORT EXCEL ─────────────────────────────────────────────────────────────
+function importerExcel(event) {
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      // Paramètres
+      const paramSheet=wb.Sheets['Paramètres'];
+      if(paramSheet){
+        const rows=XLSX.utils.sheet_to_json(paramSheet);
+        rows.forEach(r=>{
+          const k=(r['Paramètre']||'').trim();
+          const v=r['Valeur'];
+          if(v===undefined||v===null) return;
+          const s=id=>document.getElementById(id);
+          if(k==='N° de chantier')         s('num-chantier').value=v;
+          else if(k==='Position')           s('position-chantier').value=v;
+          else if(k==='Prix de coupe (CHF)') s('prix-coupe').value=v;
+          else if(k==='Nombre de coupes')   s('nb-coupes').value=v;
+          else if(k==='Frais divers (CHF)') s('frais-divers').value=v;
+          else if(k==='Tarif horaire (CHF/h)') s('tarif-horaire').value=v;
+          else if(k==='Temps par format (min)') s('temps-format').value=v;
+          else if(k==='Temps par coupe (min)')  s('temps-coupe').value=v;
+          else if(k==='Marge (%)') s('marge-pct').value=v;
+          else if(k==='TVA (%)') s('tva-pct').value=v;
+          else if(k==="Inclure main d'œuvre") s('inclure-mdo').checked=(v==='Oui');
+        });
+      }
+      // Chapitres multiplicateurs
+      const chapSheet=wb.Sheets['Chapitres'];
+      if(chapSheet){
+        chapitreMultiplicateurs={};
+        XLSX.utils.sheet_to_json(chapSheet).forEach(r=>{
+          if(r['Chapitre']&&r['Multiplicateur']>1) chapitreMultiplicateurs[r['Chapitre']]=parseInt(r['Multiplicateur']);
+        });
+      }
+      // Pièces
+      const pSheetName=wb.SheetNames.includes('Pièces')?'Pièces':wb.SheetNames[0];
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[pSheetName]);
+      if(!rows.length){alert('La feuille "Pièces" est vide.');return;}
+      const mats=chargerMateriaux();
+      function trouverMateriau(n){
+        if(!n) return mats[0];
+        const s=String(n).toLowerCase().trim();
+        return mats.find(m=>m.id===s)||mats.find(m=>m.nom.toLowerCase()===s)||mats.find(m=>s.includes(m.nom.toLowerCase()))||mats[0];
+      }
+      function trouverEpaisseur(val){
+        const v=parseFloat(val)||3;
+        let best=EPAISSEURS_STD[0],bestD=Infinity;
+        EPAISSEURS_STD.forEach(e=>{const d=Math.abs(e-v);if(d<bestD){bestD=d;best=e;}});
+        return best;
+      }
+      const remplacer=pieces.length>0?confirm('Remplacer les pièces actuelles ?\n(Annuler = ajouter à la suite)'):true;
+      if(remplacer){pieces=[];ligneCount=0;}
+      rows.forEach(row=>{
+        const nb=parseInt(row['NB Pièces']||row['NB']||row['Quantité']||1);
+        const nom=row['Matière']||row['Materiau']||'';
+        const ep=row['Épaisseur (mm)']||row['Epaisseur']||3;
+        const long=parseFloat(row['Longueur (mm)']||row['Longueur']||0);
+        const haut=parseFloat(row['Hauteur (mm)']||row['Hauteur']||0);
+        const chapitre=(row['Chapitre']||'').trim();
+        const desig=(row['Désignation']||'').trim();
+        if(nb<=0||long<=0||haut<=0) return;
+        const mat=trouverMateriau(nom);
+        ligneCount++;
+        pieces.push({id:ligneCount,nb,matId:mat.id,ep:trouverEpaisseur(ep),long,haut,chapitre,desig});
+      });
+      afficherPieces(); refreshChapPanel(); calculerTotaux(); dessinerPlanDecoupe(); sauvegarderDonnees();
+      alert(`${pieces.length} pièces importées avec succès.`);
+    }catch(err){alert('Erreur d\'importation : '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+  event.target.value='';
+}
+
+// ─── INITIALISATION ───────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',function(){
+  initialiserSelecteurDefaut();
+  initialiserTableauMateriaux();
+  chargerDonnees();
+  afficherPieces();
+  refreshChapPanel();
+  if(!pieces.length) ajouterLigne();
+  calculerTotaux();
+  dessinerPlanDecoupe();
+});
+</script>

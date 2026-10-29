@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Barreaudage — Garde-corps</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;}
+        .main-wrap{max-width:1040px;margin:0 auto;}
+
+        /* CARDS */
+        .card{background:white;padding:24px 30px;border-bottom:1px solid #f0f0f0;}
+        .card-last{border-radius:0 0 16px 16px;border-bottom:none;}
+        .card-title{font-size:1em;font-weight:700;color:#444;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid #667eea;}
+
+        /* HEADER */
+        .app-header{background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px 16px 0 0;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;}
+        .app-header h1{color:white;font-size:1.45em;}
+        .app-header .sub{color:rgba(255,255,255,.75);font-size:.82em;margin-top:3px;}
+
+        /* TOOLBAR */
+        .toolbar{background:#f5f7ff;padding:12px 30px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #e8eaf6;align-items:center;}
+
+        /* CHANTIER BAR */
+        .chantier-bar{background:#eef2ff;padding:10px 30px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #dde3fa;}
+        .chantier-bar label{font-weight:700;color:#4a56a6;font-size:.88em;white-space:nowrap;}
+        .chantier-bar input{flex:1;max-width:360px;padding:7px 11px;border:2px solid #c3cff9;border-radius:8px;font-size:.92em;background:white;}
+        .chantier-bar input:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12);}
+
+        /* BUTTONS */
+        .btn{padding:8px 16px;border:none;border-radius:8px;font-size:.88em;font-weight:600;cursor:pointer;transition:transform .15s,box-shadow .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+        .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15);}
+        .btn:active{transform:translateY(0);}
+        .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:white;}
+        .btn-green{background:linear-gradient(135deg,#28a745,#20c997);color:white;}
+        .btn-blue{background:linear-gradient(135deg,#17a2b8,#0056b3);color:white;}
+        .btn-red{background:#dc3545;color:white;}
+        .btn-outline{background:white;border:2px solid #667eea;color:#667eea;}
+        .btn-sm{padding:4px 10px;font-size:.8em;border-radius:6px;}
+        .btn-calc{width:100%;padding:13px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;font-size:1em;font-weight:700;border-radius:8px;border:none;cursor:pointer;margin-top:6px;transition:transform .15s,box-shadow .15s;}
+        .btn-calc:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(102,126,234,.4);}
+        .btn-adj{padding:7px 14px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:8px;font-size:.9em;font-weight:700;cursor:pointer;transition:transform .15s;}
+        .btn-adj:hover{transform:translateY(-2px);}
+        .btn-adj-red{background:linear-gradient(135deg,#e74c3c,#c0392b);}
+        .rv-danger{color:#dc3545!important;}
+
+        /* TABLE */
+        .tbl-wrap{overflow-x:auto;}
+        table{width:100%;border-collapse:collapse;font-size:.88em;}
+        table th{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:9px 11px;text-align:left;white-space:nowrap;}
+        table td{padding:8px 11px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+        table tr:hover td{background:#f8f9ff;}
+        table tr.active-row td{background:#eef2ff;}
+        .badge{display:inline-block;padding:3px 9px;border-radius:12px;font-size:.78em;font-weight:700;}
+        .badge-ok{background:#d4edda;color:#155724;}
+        .badge-nok{background:#f8d7da;color:#721c24;}
+        .empty{text-align:center;padding:28px;color:#bbb;}
+        .empty .ico{font-size:2em;margin-bottom:7px;}
+
+        /* FORM */
+        .fg{margin-bottom:14px;}
+        .fg label{display:block;margin-bottom:5px;color:#555;font-weight:600;font-size:.88em;}
+        .fg input{width:100%;padding:9px 12px;border:2px solid #e0e0e0;border-radius:8px;font-size:.92em;transition:border-color .2s,box-shadow .2s;}
+        .fg input:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1);}
+        .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+        .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+
+        /* VIDE MAÇONNERIE — TOGGLE */
+        .maco-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;
+            background:#f0f4ff;border:2px solid #c3cff9;border-radius:10px;padding:10px 14px;
+            margin-bottom:14px;font-weight:700;color:#4a56a6;font-size:.9em;transition:background .2s;}
+        .maco-toggle:hover{background:#e6ecff;}
+        .maco-arrow{display:inline-block;transition:transform .25s;font-size:.85em;}
+        .maco-arrow.open{transform:rotate(90deg);}
+        .maco-body{background:#f0f4ff;border:2px solid #c3cff9;border-top:none;border-radius:0 0 10px 10px;
+            padding:16px;margin-top:-14px;margin-bottom:14px;display:none;}
+        .maco-body.open{display:block;}
+        .maco-calc{margin-top:11px;padding:9px 13px;background:white;border-radius:8px;
+            display:none;align-items:center;justify-content:space-between;gap:10px;font-size:.88em;flex-wrap:wrap;}
+        .maco-calc strong{color:#667eea;font-size:1.1em;}
+
+        /* SEPARATOR */
+        .sep{border:none;border-top:1px solid #f0f0f0;margin:18px 0;}
+
+        /* RESULTS */
+        .results-box{background:#f8f9fa;border-radius:12px;border-left:5px solid #667eea;padding:20px;margin-top:18px;display:none;}
+        .results-box.show{display:block;animation:slideIn .3s ease;}
+        @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        .rrow{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:white;border-radius:8px;margin-bottom:8px;}
+        .rrow.hl{border-left:3px solid #667eea;}
+        .rl{color:#555;font-weight:600;font-size:.88em;}
+        .rv{color:#667eea;font-weight:700;font-size:1.05em;}
+        .st-ok{background:#d4edda;color:#155724;padding:11px 15px;border-radius:8px;font-weight:600;font-size:.9em;margin:10px 0;}
+        .st-nok{background:#f8d7da;color:#721c24;padding:11px 15px;border-radius:8px;font-weight:600;font-size:.9em;margin:10px 0;}
+
+        /* ADJUST */
+        .adj-panel{display:none;background:#eef2ff;border-radius:10px;padding:12px;text-align:center;margin:12px 0;}
+        .adj-panel.show{display:block;}
+        .adj-panel p{color:#555;font-weight:600;margin-bottom:9px;font-size:.88em;}
+        .adj-row{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;}
+        .adj-disp{font-size:1.15em;font-weight:700;color:#667eea;min-width:85px;display:inline-block;}
+
+        /* DIAGRAM */
+        .diag-box{margin-top:14px;padding:14px;background:white;border-radius:8px;}
+        .diag-box h4{color:#555;margin-bottom:9px;font-size:.9em;}
+        #diagCanvas{display:block;width:100%;border:1px solid #e8e8e8;border-radius:6px;}
+
+        /* RESULT ACTIONS */
+        .res-actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;}
+
+        /* FOOTER */
+        .app-footer{text-align:center;color:rgba(255,255,255,.6);font-size:.78em;margin-top:14px;padding-bottom:4px;}
+
+        /* INLINE TABLE ADJUST BUTTONS */
+        .tbl-adj{display:flex;align-items:center;gap:3px;white-space:nowrap;}
+        .tadj{padding:2px 6px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;
+            border:none;border-radius:5px;font-size:.75em;font-weight:700;cursor:pointer;
+            transition:transform .1s,box-shadow .1s;line-height:1.4;}
+        .tadj:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(102,126,234,.4);}
+        .tadj:active{transform:translateY(0);}
+        .tadj-val{font-weight:700;color:#333;font-size:.92em;min-width:46px;text-align:center;
+            padding:1px 4px;background:#f0f2ff;border-radius:5px;border:1px solid #dde3fa;}
+
+        /* RESPONSIVE */
+        @media(max-width:640px){
+            .g2,.g3{grid-template-columns:1fr;}
+            .card{padding:18px 14px;}
+            .toolbar,.chantier-bar{padding:10px 14px;}
+        }
+
+        /* ========== PRINT ========== */
+        @media print{
+            body{background:white!important;padding:0;}
+            #appZone{display:none!important;}
+            #printZone{display:block!important;padding:16px 20px;}
+            .pf{font-family:Arial,sans-serif;}
+            .pf-header{display:flex;justify-content:space-between;align-items:flex-start;
+                padding-bottom:10px;border-bottom:3px solid #667eea;margin-bottom:14px;}
+            .pf-header h2{color:#333;font-size:1.2em;}
+            .pf-chantier{color:#555;font-size:.88em;margin-top:3px;}
+            .pf-ref{color:#667eea;font-size:1em;font-weight:700;margin-top:2px;}
+            .pf-meta{text-align:right;font-size:.8em;color:#666;line-height:1.6;}
+            .pf-status-ok{background:#d4edda;color:#155724;padding:8px 14px;border-radius:7px;
+                text-align:center;font-weight:700;margin-bottom:12px;font-size:.88em;}
+            .pf-status-nok{background:#f8d7da;color:#721c24;padding:8px 14px;border-radius:7px;
+                text-align:center;font-weight:700;margin-bottom:12px;font-size:.88em;}
+            .pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+            .pf-box{border:1px solid #ddd;border-radius:7px;padding:11px;}
+            .pf-box h4{font-size:.75em;text-transform:uppercase;letter-spacing:.5px;color:#667eea;
+                margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:5px;}
+            .pf-row{display:flex;justify-content:space-between;font-size:.83em;padding:3px 0;border-bottom:1px solid #f8f8f8;}
+            .pf-row .pfl{color:#666;}
+            .pf-row .pfv{font-weight:700;color:#333;}
+            .pf-diag{width:100%;border:1px solid #ddd;border-radius:7px;margin-bottom:14px;display:block;}
+            .pf-sign{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+            .pf-sign-box{border:1px solid #ddd;border-radius:7px;padding:9px 12px;min-height:52px;}
+            .pf-sign-label{font-size:.72em;color:#999;margin-bottom:5px;}
+            .pf-note{font-size:.7em;color:#bbb;text-align:right;margin-top:8px;}
+            /* Summary */
+            .pf-sum-table{width:100%;border-collapse:collapse;font-size:.8em;margin-top:10px;}
+            .pf-sum-table th{background:#667eea;color:white;padding:7px 9px;text-align:left;}
+            .pf-sum-table td{padding:6px 9px;border-bottom:1px solid #eee;}
+            .pf-sum-table tr:nth-child(even) td{background:#f8f9fa;}
+        }
+        #printZone{display:none;}
+    </style>
+</head>
+<body>
+
+<!-- ================== APP ================== -->
+<div class="main-wrap" id="appZone">
+
+    <!-- HEADER -->
+    <div class="app-header">
+        <div>
+            <h1>🔧 Calculateur de Barreaudage</h1>
+            <div class="sub">Vide maximum 119 mm — Gestion des positions de garde-corps</div>
+        </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <button class="btn btn-primary" onclick="nouvellePosition()">➕ Nouvelle position</button>
+        <button class="btn btn-green"   onclick="exporterExcel()">📊 Exporter Excel</button>
+        <button class="btn btn-blue"    onclick="document.getElementById('fileImport').click()">📂 Importer Excel</button>
+        <input type="file" id="fileImport" accept=".xlsx,.xls" style="display:none" onchange="importerExcel(this)">
+        <button class="btn btn-outline" onclick="imprimerTout()">🖨️ Imprimer récap.</button>
+    </div>
+
+    <!-- CHANTIER NAME (persistent) -->
+    <div class="chantier-bar">
+        <label>🏗️ Chantier :</label>
+        <input type="text" id="nomChantier" placeholder="Nom du chantier (commun à toutes les positions)…">
+    </div>
+
+    <!-- FORM -->
+    <div class="card" id="formCard">
+        <div class="card-title" id="formTitle">✏️ Nouvelle position</div>
+
+        <!-- RÉFÉRENCE -->
+        <div class="fg">
+            <label>Référence / Nom de la position</label>
+            <input type="text" id="posRef" placeholder="Ex: GC-01, Balcon Nord, Escalier Hall…">
+        </div>
+
+        <!-- VIDE MAÇONNERIE (toggle) -->
+        <div class="maco-toggle" id="macoToggle" onclick="toggleMaco()">
+            <span class="maco-arrow" id="macoArrow">▶</span>
+            🧱 Calcul depuis vide maçonnerie
+        </div>
+        <div class="maco-body" id="macoBody">
+            <div class="g3">
+                <div class="fg" style="margin-bottom:0">
+                    <label>Vide maçonnerie (mm)</label>
+                    <input type="number" id="videMaco" placeholder="Ex: 2200" min="0" step="1" oninput="calcMaco()">
+                </div>
+                <div class="fg" style="margin-bottom:0">
+                    <label>Retrait gauche (mm)</label>
+                    <input type="number" id="retraitG" placeholder="Ex: 50" min="0" step="1" oninput="calcMaco()">
+                </div>
+                <div class="fg" style="margin-bottom:0">
+                    <label>Retrait droit (mm)</label>
+                    <input type="number" id="retraitD" placeholder="Ex: 50" min="0" step="1" oninput="calcMaco()">
+                </div>
+            </div>
+            <div class="maco-calc" id="macoResult">
+                <span>Longueur barrière calculée :</span>
+                <strong id="macoVal">—</strong>
+                <button class="btn btn-primary btn-sm" onclick="appliquerMaco()">⬇ Appliquer</button>
+            </div>
+        </div>
+
+        <!-- PARAMÈTRES -->
+        <div class="fg">
+            <label>Longueur totale barrière — montants d'extrémité inclus (mm)</label>
+            <input type="number" id="longueurTotale" placeholder="Ex: 2080" min="0" step="1" oninput="autoRecalc()">
+        </div>
+        <div class="g2">
+            <div class="fg">
+                <label>Nombre total de montants (avec extrémités)</label>
+                <input type="number" id="nombreMontants" placeholder="Ex: 3" min="2" step="1" oninput="autoRecalc()">
+            </div>
+            <div class="fg">
+                <label>Dimension montant (mm)</label>
+                <input type="number" id="dimensionMontant" placeholder="Ex: 40" min="0" step="1" oninput="autoRecalc()">
+            </div>
+        </div>
+        <div class="fg">
+            <label>Dimension barreau (mm)</label>
+            <input type="number" id="dimensionBarreau" placeholder="Ex: 12" min="0" step="1" oninput="autoRecalc()">
+        </div>
+
+        <button class="btn-calc" onclick="calculer()">📐 Calculer</button>
+
+        <!-- RESULTS -->
+        <div class="results-box" id="resultsBox">
+            <h3 style="color:#333;margin-bottom:14px;font-size:1em;">📊 Résultats</h3>
+
+            <div class="rrow"><span class="rl">Vide entre montants :</span><span class="rv" id="rVM">—</span></div>
+            <div class="rrow hl"><span class="rl">Entraxe montant (c/c) :</span><span class="rv" id="rEM">—</span></div>
+            <div class="rrow"><span class="rl">Barreaux / intervalle :</span><span class="rv" id="rNBI">—</span></div>
+            <div class="rrow"><span class="rl">Nombre total de barreaux :</span><span class="rv" id="rNBT">—</span></div>
+            <div class="rrow"><span class="rl">Entraxe barreau (c/c) :</span><span class="rv" id="rEB">—</span></div>
+            <div class="rrow hl"><span class="rl">Vide entre barreaux :</span><span class="rv" id="rVB">—</span></div>
+
+            <div id="statusMsg"></div>
+
+            <!-- ADJUST ±1mm -->
+            <div class="adj-panel" id="adjPanel">
+                <p>Ajuster la longueur de la barrière</p>
+                <div class="adj-row">
+                    <button class="btn-adj" onclick="ajusterLongueur(-10)">−10 mm</button>
+                    <button class="btn-adj" onclick="ajusterLongueur(-1)">−1 mm</button>
+                    <span class="adj-disp" id="adjDisp">— mm</span>
+                    <button class="btn-adj" onclick="ajusterLongueur(+1)">+1 mm</button>
+                    <button class="btn-adj" onclick="ajusterLongueur(+10)">+10 mm</button>
+                </div>
+            </div>
+
+            <!-- ADJUST ±1 BARREAU -->
+            <div class="adj-panel adj-barr show" id="adjBarrPanel" style="display:none">
+                <p>Ajuster le nombre de barreaux / intervalle</p>
+                <div class="adj-row">
+                    <button class="btn-adj btn-adj-red" onclick="ajusterBarreaux(-1)">−1 barreau</button>
+                    <span class="adj-disp" id="adjBarrDisp">— barr.</span>
+                    <button class="btn-adj" onclick="ajusterBarreaux(+1)">+1 barreau</button>
+                </div>
+                <div style="font-size:.78em;color:#888;margin-top:6px;">Calcul auto = minimum requis — ajustez selon besoin</div>
+            </div>
+
+            <!-- DIAGRAM -->
+            <div class="diag-box">
+                <h4>Schéma visuel coté</h4>
+                <canvas id="diagCanvas"></canvas>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="res-actions">
+                <button class="btn btn-green"   onclick="sauvegarderPosition()">💾 Sauvegarder</button>
+                <button class="btn btn-outline"  onclick="imprimerFicheActive()">🖨️ Imprimer la fiche</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POSITIONS TABLE -->
+    <div class="card card-last">
+        <div class="card-title">📋 Positions de garde-corps</div>
+        <div id="posWrap">
+            <div class="empty"><div class="ico">📐</div>
+            Aucune position — cliquez sur <strong>Nouvelle position</strong></div>
+        </div>
+    </div>
+
+    <div class="app-footer">Créé par Dominique Rossier</div>
+</div>
+
+<!-- PRINT ZONE (inutilisé — impression via window.open) -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const VIDE_MAX = 119;
+let positions    = [];
+let currentEditId = null;
+let lastResult   = null;
+let lastDiagUrl  = null;
+
+/* =====================================================
+   TOGGLE VIDE MAÇONNERIE
+===================================================== */
+function toggleMaco() {
+    const body  = document.getElementById('macoBody');
+    const arrow = document.getElementById('macoArrow');
+    const open  = body.classList.toggle('open');
+    arrow.classList.toggle('open', open);
+    if (!open) {
+        // Reset fields when closing
+        ['videMaco','retraitG','retraitD'].forEach(id => document.getElementById(id).value='');
+        document.getElementById('macoResult').style.display = 'none';
+    }
+}
+
+/* =====================================================
+   VIDE MAÇONNERIE CALCUL
+===================================================== */
+function calcMaco() {
+    const vm = parseFloat(document.getElementById('videMaco').value);
+    const rG = parseFloat(document.getElementById('retraitG').value) || 0;
+    const rD = parseFloat(document.getElementById('retraitD').value) || 0;
+    const div = document.getElementById('macoResult');
+    if (!isNaN(vm) && vm > 0) {
+        document.getElementById('macoVal').textContent = (vm-rG-rD).toFixed(0)+' mm';
+        div.style.display = 'flex';
+    } else {
+        div.style.display = 'none';
+    }
+}
+function appliquerMaco() {
+    const vm = parseFloat(document.getElementById('videMaco').value);
+    const rG = parseFloat(document.getElementById('retraitG').value)||0;
+    const rD = parseFloat(document.getElementById('retraitD').value)||0;
+    if (!isNaN(vm) && vm>0) document.getElementById('longueurTotale').value = Math.round(vm-rG-rD);
+}
+
+/* =====================================================
+   CALCUL PRINCIPAL
+===================================================== */
+function calculer() {
+    const lt = parseFloat(document.getElementById('longueurTotale').value);
+    const nm = parseInt(document.getElementById('nombreMontants').value);
+    const dm = parseFloat(document.getElementById('dimensionMontant').value);
+    const db = parseFloat(document.getElementById('dimensionBarreau').value);
+
+    if ([lt,nm,dm,db].some(isNaN)) { alert('Veuillez remplir tous les champs de paramètres.'); return; }
+    if (nm<2) { alert('Minimum 2 montants.'); return; }
+
+    const videTotal = lt - nm*dm;
+    if (videTotal<=0) { alert('Longueur insuffisante pour placer tous les montants.'); return; }
+
+    const ni  = nm-1;
+    const vpi = videTotal/ni;
+
+    let nbBar=0, vide=0, found=false;
+    if (vpi<=VIDE_MAX) { vide=vpi; found=true; }
+    else {
+        for (let n=1; n<=500; n++) {
+            const e=(vpi-n*db)/(n+1);
+            if (e<=0) break;
+            if (e<=VIDE_MAX) { nbBar=n; vide=e; found=true; break; }
+        }
+    }
+    if (!found) { alert('Impossible de calculer une configuration valide.'); return; }
+
+    const nbTot = nbBar*ni;
+    const emont = vpi+dm;
+    const ebarr = nbBar>0 ? db+vide : 0;
+    const conf  = vide<=VIDE_MAX;
+
+    lastResult = {
+        ref:      document.getElementById('posRef').value.trim() || 'Sans nom',
+        chantier: document.getElementById('nomChantier').value.trim(),
+        lt, nm, dm, db,
+        videMaco: parseFloat(document.getElementById('videMaco').value)||null,
+        retraitG: parseFloat(document.getElementById('retraitG').value)||null,
+        retraitD: parseFloat(document.getElementById('retraitD').value)||null,
+        vpi, emont, nbBar, nbTot, ebarr, vide, ni, conf, diagramUrl:null
+    };
+
+    document.getElementById('rVM') .textContent = vpi.toFixed(2)+' mm';
+    document.getElementById('rEM') .textContent = emont.toFixed(2)+' mm';
+    document.getElementById('rNBI').textContent = nbBar+' / intervalle';
+    document.getElementById('rNBT').textContent = nbTot+' barreaux';
+    document.getElementById('rEB') .textContent = ebarr>0?ebarr.toFixed(2)+' mm':'—';
+    const rVBel = document.getElementById('rVB');
+    rVBel.textContent = vide.toFixed(2)+' mm';
+    rVBel.className = 'rv' + (conf ? '' : ' rv-danger');
+
+    const sm = document.getElementById('statusMsg');
+    if (conf) sm.innerHTML=`<div class="st-ok">✓ Conforme — Vide de ${vide.toFixed(2)} mm ≤ ${VIDE_MAX} mm (${(vide/VIDE_MAX*100).toFixed(1)} % du max)</div>`;
+    else      sm.innerHTML=`<div class="st-nok">✗ Non conforme — Vide de ${vide.toFixed(2)} mm dépasse ${VIDE_MAX} mm !</div>`;
+
+    document.getElementById('resultsBox').classList.add('show');
+    document.getElementById('adjPanel').classList.add('show');
+    document.getElementById('adjDisp').textContent = lt.toFixed(0)+' mm';
+    document.getElementById('adjBarrPanel').style.display = 'block';
+    document.getElementById('adjBarrDisp').textContent = nbBar+' barr./int.';
+
+    dessiner(lastResult);
+
+    // Capture diagram URL
+    const cv = document.getElementById('diagCanvas');
+    lastDiagUrl = cv.toDataURL('image/png');
+    lastResult.diagramUrl = lastDiagUrl;
+}
+
+function autoRecalc() {
+    if (lastResult !== null) calculer();
+}
+
+function ajusterBarreaux(delta) {
+    if (!lastResult) return;
+    const nbBar = Math.max(0, lastResult.nbBar + delta);
+    // Recalculate vide with new nbBar
+    const vide = nbBar === 0
+        ? lastResult.vpi
+        : (lastResult.vpi - nbBar * lastResult.db) / (nbBar + 1);
+    if (vide < 0) { return; } // impossible de mettre autant de barreaux
+
+    const nbTot = nbBar * lastResult.ni;
+    const ebarr = nbBar > 0 ? lastResult.db + vide : 0;
+    const conf  = vide <= VIDE_MAX;
+
+    lastResult = {...lastResult, nbBar, nbTot, ebarr, vide, conf};
+
+    // Mise à jour affichage
+    document.getElementById('rNBI').textContent = nbBar+' / intervalle';
+    document.getElementById('rNBT').textContent = nbTot+' barreaux';
+    document.getElementById('rEB') .textContent = ebarr>0?ebarr.toFixed(2)+' mm':'—';
+    const rVBel = document.getElementById('rVB');
+    rVBel.textContent = vide.toFixed(2)+' mm';
+    rVBel.className = 'rv' + (conf ? '' : ' rv-danger');
+    document.getElementById('adjBarrDisp').textContent = nbBar+' barr./int.';
+
+    const sm = document.getElementById('statusMsg');
+    if (conf) sm.innerHTML=`<div class="st-ok">✓ Conforme — Vide de ${vide.toFixed(2)} mm ≤ ${VIDE_MAX} mm (${(vide/VIDE_MAX*100).toFixed(1)} % du max)</div>`;
+    else      sm.innerHTML=`<div class="st-nok">✗ Non conforme — Vide de ${vide.toFixed(2)} mm dépasse ${VIDE_MAX} mm !</div>`;
+
+    dessiner(lastResult);
+    lastDiagUrl = document.getElementById('diagCanvas').toDataURL('image/png');
+    lastResult.diagramUrl = lastDiagUrl;
+
+    // Auto-mise à jour tableau si position sauvegardée
+    if (currentEditId !== null) {
+        const idx = positions.findIndex(p=>p.id===currentEditId);
+        if (idx>=0) { positions[idx]={id:currentEditId,...lastResult}; renderTable(); }
+    }
+}
+
+function ajusterLongueur(delta) {
+    const inp = document.getElementById('longueurTotale');
+    inp.value = Math.max(0, (parseFloat(inp.value)||0)+delta);
+    calculer();
+    // Auto-mise à jour du tableau si position déjà sauvegardée
+    if (currentEditId !== null && lastResult) {
+        lastResult.diagramUrl = lastDiagUrl;
+        const idx = positions.findIndex(p=>p.id===currentEditId);
+        if (idx>=0) { positions[idx]={id:currentEditId,...lastResult}; renderTable(); }
+    }
+}
+
+/* =====================================================
+   DIAGRAMME COTÉ
+===================================================== */
+function dessiner(r) {
+    dessinerSurCanvas(document.getElementById('diagCanvas'), r);
+}
+
+function captureOffscreen(r) {
+    const cv = document.createElement('canvas');
+    dessinerSurCanvas(cv, r);
+    return cv.toDataURL('image/png');
+}
+
+function dessinerSurCanvas(cv, r) {
+    const ctx = cv.getContext('2d');
+    const IW = 900, IH = 310;
+    cv.width  = IW;
+    cv.height = IH;
+
+    ctx.clearRect(0, 0, IW, IH);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, IW, IH);
+
+    const margin = 40;
+    const drawW  = IW - 2*margin;
+    const barH   = 68;
+    const yTop   = 52;
+    const yBot   = yTop + barH;
+    const scale  = drawW / r.lt;
+
+    // Key X positions
+    const xP1L = margin;
+    const xP1R = margin + r.dm * scale;
+    const xP1C = (xP1L+xP1R)/2;
+    const xP2L = margin + (r.dm + r.vpi) * scale;
+    const xP2R = xP2L + r.dm * scale;
+    const xP2C = (xP2L+xP2R)/2;
+    const xEnd  = margin + drawW;
+
+    // First bar (if exists)
+    const xB1L = xP1R + r.vide * scale;
+    const xB1R = xB1L + r.db  * scale;
+
+    /* ---- Draw bars & posts ---- */
+    let x = margin;
+    for (let i=0; i<r.nm; i++) {
+        const mw = r.dm * scale;
+        // Post shadow
+        ctx.fillStyle = 'rgba(118,75,162,.18)';
+        ctx.fillRect(x+3, yTop+3, mw, barH);
+        // Post fill
+        ctx.fillStyle = '#764ba2';
+        ctx.fillRect(x, yTop, mw, barH);
+        // Post border
+        ctx.strokeStyle = '#5a3680'; ctx.lineWidth = 1;
+        ctx.strokeRect(x, yTop, mw, barH);
+
+        if (i<r.nm-1) {
+            x += mw;
+            x += r.vide * scale;
+            for (let j=0; j<r.nbBar; j++) {
+                ctx.fillStyle = 'rgba(102,126,234,.18)';
+                ctx.fillRect(x+2, yTop+2, r.db*scale, barH);
+                ctx.fillStyle = '#667eea';
+                ctx.fillRect(x, yTop, r.db*scale, barH);
+                ctx.strokeStyle='#4a5db5'; ctx.lineWidth=1;
+                ctx.strokeRect(x, yTop, r.db*scale, barH);
+                x += r.db*scale + r.vide*scale;
+            }
+        } else { x += mw; }
+    }
+
+    /* ---- Helper: dimension line ---- */
+    function cote(x1, x2, y, label, col, dashed) {
+        if (x2-x1 < 4) return;
+        ctx.save();
+        ctx.strokeStyle = col||'#444';
+        ctx.fillStyle   = col||'#444';
+        ctx.lineWidth   = 1.2;
+        if (dashed) ctx.setLineDash([4,3]);
+        else        ctx.setLineDash([]);
+
+        // Main line
+        ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+
+        // End ticks
+        ctx.setLineDash([]);
+        [x1,x2].forEach(xi=>{
+            ctx.beginPath(); ctx.moveTo(xi,y-5); ctx.lineTo(xi,y+5); ctx.stroke();
+        });
+
+        // Arrowheads (inward)
+        const aw = Math.min(7, (x2-x1)/3);
+        ctx.beginPath();
+        ctx.moveTo(x1,y); ctx.lineTo(x1+aw,y-3); ctx.lineTo(x1+aw,y+3); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x2,y); ctx.lineTo(x2-aw,y-3); ctx.lineTo(x2-aw,y+3); ctx.closePath(); ctx.fill();
+
+        // Label background + text
+        ctx.setLineDash([]);
+        ctx.font = 'bold 11px Arial';
+        const tw = ctx.measureText(label).width;
+        const mx = (x1+x2)/2;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(mx-tw/2-3, y-15, tw+6, 13);
+        ctx.fillStyle = col||'#444';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, mx, y-4);
+        ctx.restore();
+    }
+
+    /* ---- Helper: vertical ref line ---- */
+    function vref(x, y1, y2, col) {
+        ctx.save();
+        ctx.strokeStyle = col||'#ccc';
+        ctx.lineWidth = 0.7;
+        ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+        ctx.restore();
+    }
+
+    /* ---- COTE 1 : Longueur totale (above) ---- */
+    cote(margin, xEnd, yTop-18, `L totale = ${r.lt.toFixed(0)} mm`, '#333');
+
+    /* Vertical refs for cotes below */
+    const yC1 = yBot+18;   // entraxe montant
+    const yC2 = yBot+36;   // vide entre montants
+    const yC3 = yBot+56;   // vide barreaux
+    const yC4 = yBot+76;   // dim barreau or dim montant (2nd)
+    const yC5 = yBot+96;   // dim montant
+
+    vref(xP1C, yBot, yC1+6, '#764ba2');
+    vref(xP2C, yBot, yC1+6, '#764ba2');
+    vref(xP1R, yBot, yC2+6, '#9e7bb5');
+    vref(xP2L, yBot, yC2+6, '#9e7bb5');
+
+    /* ---- COTE 2 : Entraxe montant ---- */
+    cote(xP1C, xP2C, yC1, `Entraxe mont. = ${r.emont.toFixed(2)} mm`, '#764ba2');
+
+    /* ---- COTE 3 : Vide entre montants ---- */
+    cote(xP1R, xP2L, yC2, `Vide/montants = ${r.vpi.toFixed(2)} mm`, '#9e7bb5');
+
+    if (r.nbBar > 0) {
+        vref(xP1R, yBot, yC3+6, '#667eea');
+        vref(xB1L, yBot, yC3+6, '#667eea');
+        vref(xB1R, yBot, yC4+6, '#667eea');
+        vref(xP1L, yBot, yC5+6, '#555');
+        vref(xP1R, yBot, yC5+6, '#555');
+
+        /* ---- COTE 4 : Vide entre barreaux ---- */
+        cote(xP1R, xB1L, yC3, `Vide = ${r.vide.toFixed(2)} mm`, '#667eea');
+
+        /* ---- COTE 5 : Dimension barreau ---- */
+        cote(xB1L, xB1R, yC4, `∅ barr. = ${r.db} mm`, '#4a5db5');
+
+        /* ---- COTE 6 : Dimension montant ---- */
+        cote(xP1L, xP1R, yC5, `∅ mont. = ${r.dm} mm`, '#5a3680');
+
+    } else {
+        // No bars: vide = full interval
+        vref(xP1R, yBot, yC3+6, '#667eea');
+        vref(xP2L, yBot, yC3+6, '#667eea');
+        vref(xP1L, yBot, yC4+6, '#5a3680');
+        vref(xP1R, yBot, yC4+6, '#5a3680');
+
+        cote(xP1R, xP2L, yC3, `Vide = ${r.vide.toFixed(2)} mm`, '#667eea');
+        cote(xP1L,  xP1R, yC4, `∅ mont. = ${r.dm} mm`, '#5a3680');
+    }
+
+    /* ---- Labels on drawing ---- */
+    ctx.save();
+    ctx.font = 'bold 10px Arial'; ctx.textAlign='center'; ctx.fillStyle='white';
+    // Post 1 label
+    if (xP1R-xP1L > 22) ctx.fillText('M', xP1C, yTop+barH/2+4);
+    // Bar 1 label
+    if (r.nbBar>0 && xB1R-xB1L>14) ctx.fillText('B', (xB1L+xB1R)/2, yTop+barH/2+4);
+    ctx.restore();
+
+    /* ---- Legend ---- */
+    const yLeg = IH-10;
+    ctx.font='11px Arial'; ctx.textAlign='left'; ctx.fillStyle='#764ba2';
+    ctx.fillRect(margin, yLeg-11, 12, 12);
+    ctx.fillStyle='#333'; ctx.fillText('Montants', margin+15, yLeg);
+    ctx.fillStyle='#667eea'; ctx.fillRect(margin+100, yLeg-11, 12, 12);
+    ctx.fillStyle='#333'; ctx.fillText('Barreaux', margin+115, yLeg);
+    ctx.fillStyle='#bbb'; ctx.textAlign='right';
+    ctx.fillText('barreaux d\'extrémité = virtuels (touchent les montants)', IW-margin, yLeg);
+}
+
+/* =====================================================
+   GESTION DES POSITIONS
+===================================================== */
+function nouvellePosition() {
+    currentEditId = null;
+    document.getElementById('formTitle').textContent = '✏️ Nouvelle position';
+    clearForm(false); // false = don't clear chantier
+    document.getElementById('formCard').scrollIntoView({behavior:'smooth'});
+    document.getElementById('posRef').focus();
+}
+
+function clearForm(clearChantier) {
+    if (clearChantier) document.getElementById('nomChantier').value='';
+    ['posRef','longueurTotale','nombreMontants','dimensionMontant','dimensionBarreau',
+     'videMaco','retraitG','retraitD'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('macoResult').style.display='none';
+    document.getElementById('resultsBox').classList.remove('show');
+    document.getElementById('adjPanel').classList.remove('show');
+    document.getElementById('adjBarrPanel').style.display='none';
+    document.getElementById('statusMsg').innerHTML='';
+    // Close maco if open
+    document.getElementById('macoBody').classList.remove('open');
+    document.getElementById('macoArrow').classList.remove('open');
+    lastResult  = null;
+    lastDiagUrl = null;
+}
+
+function sauvegarderPosition() {
+    if (!lastResult) { alert('Effectuez d\'abord un calcul.'); return; }
+    lastResult.ref     = document.getElementById('posRef').value.trim() || lastResult.ref;
+    lastResult.chantier= document.getElementById('nomChantier').value.trim();
+    lastResult.diagramUrl = lastDiagUrl;
+
+    if (currentEditId!==null) {
+        const idx = positions.findIndex(p=>p.id===currentEditId);
+        if (idx>=0) positions[idx]={id:currentEditId,...lastResult};
+    } else {
+        const id = Date.now();
+        positions.push({id,...lastResult});
+        currentEditId = id;
+    }
+    renderTable();
+
+    // After saving: keep chantier name, clear everything else, ready for next position
+    const chantier = document.getElementById('nomChantier').value;
+    clearForm(false);
+    currentEditId = null;
+    document.getElementById('formTitle').textContent = '✏️ Nouvelle position';
+    // Confirm save
+    const bar = document.getElementById('nomChantier');
+    bar.style.borderColor='#28a745';
+    setTimeout(()=>bar.style.borderColor='',1500);
+}
+
+function editerPosition(id) {
+    const pos = positions.find(p=>p.id===id);
+    if (!pos) return;
+    currentEditId = id;
+    document.getElementById('formTitle').textContent = '✏️ Modifier : '+pos.ref;
+    document.getElementById('posRef').value           = pos.ref;
+    if (pos.chantier) document.getElementById('nomChantier').value = pos.chantier;
+    document.getElementById('longueurTotale').value   = pos.lt;
+    document.getElementById('nombreMontants').value   = pos.nm;
+    document.getElementById('dimensionMontant').value = pos.dm;
+    document.getElementById('dimensionBarreau').value = pos.db;
+    if (pos.videMaco) {
+        document.getElementById('videMaco').value  = pos.videMaco;
+        document.getElementById('retraitG').value  = pos.retraitG||0;
+        document.getElementById('retraitD').value  = pos.retraitD||0;
+        // Open maco toggle
+        document.getElementById('macoBody').classList.add('open');
+        document.getElementById('macoArrow').classList.add('open');
+        calcMaco();
+    } else {
+        document.getElementById('macoBody').classList.remove('open');
+        document.getElementById('macoArrow').classList.remove('open');
+    }
+    document.getElementById('formCard').scrollIntoView({behavior:'smooth'});
+    calculer();
+    renderTable();
+}
+
+function dupliquerPosition(id) {
+    const src = positions.find(p=>p.id===id);
+    if (!src) return;
+
+    // Créer une copie avec un nouvel id et un nom modifié
+    const newId  = Date.now();
+    const newRef = src.ref + ' (copie)';
+    const copy   = {...src, id: newId, ref: newRef, diagramUrl: null};
+    positions.push(copy);
+    renderTable();
+
+    // Ouvrir directement dans le formulaire pour édition
+    currentEditId = newId;
+    document.getElementById('formTitle').textContent = '✏️ Modifier : '+newRef;
+    document.getElementById('posRef').value           = newRef;
+    if (src.chantier) document.getElementById('nomChantier').value = src.chantier;
+    document.getElementById('longueurTotale').value   = src.lt;
+    document.getElementById('nombreMontants').value   = src.nm;
+    document.getElementById('dimensionMontant').value = src.dm;
+    document.getElementById('dimensionBarreau').value = src.db;
+    if (src.videMaco) {
+        document.getElementById('videMaco').value = src.videMaco;
+        document.getElementById('retraitG').value = src.retraitG||0;
+        document.getElementById('retraitD').value = src.retraitD||0;
+        document.getElementById('macoBody').classList.add('open');
+        document.getElementById('macoArrow').classList.add('open');
+        calcMaco();
+    } else {
+        document.getElementById('macoBody').classList.remove('open');
+        document.getElementById('macoArrow').classList.remove('open');
+        document.getElementById('macoResult').style.display='none';
+    }
+    document.getElementById('formCard').scrollIntoView({behavior:'smooth'});
+    calculer();
+    renderTable();
+}
+
+function supprimerPosition(id) {
+    if (!confirm('Supprimer cette position ?')) return;
+    positions = positions.filter(p=>p.id!==id);
+    if (currentEditId===id) currentEditId=null;
+    renderTable();
+}
+
+function ajusterPositionDirecte(id, delta) {
+    const idx = positions.findIndex(p=>p.id===id);
+    if (idx<0) return;
+    const p = positions[idx];
+
+    const lt = Math.max(0, p.lt + delta);
+    const videTotal = lt - p.nm * p.dm;
+    if (videTotal <= 0) return;
+
+    const ni  = p.nm - 1;
+    const vpi = videTotal / ni;
+    let nbBar=0, vide=0, found=false;
+    if (vpi<=VIDE_MAX) { vide=vpi; found=true; }
+    else { for(let n=1;n<=500;n++){const e=(vpi-n*p.db)/(n+1);if(e<=0)break;if(e<=VIDE_MAX){nbBar=n;vide=e;found=true;break;}} }
+    if (!found) return;
+
+    const nbTot = nbBar*ni;
+    const emont = vpi+p.dm;
+    const ebarr = nbBar>0?p.db+vide:0;
+    const conf  = vide<=VIDE_MAX;
+
+    // Redessiner et capturer le schéma en arrière-plan
+    const updated = {...p, lt, vpi, emont, nbBar, nbTot, ebarr, vide, ni, conf};
+    updated.diagramUrl = captureOffscreen(updated);
+    positions[idx] = updated;
+
+    // Si c'est la position en cours d'édition, mettre à jour le formulaire aussi
+    if (currentEditId===id) {
+        document.getElementById('longueurTotale').value = lt;
+        lastResult = updated;
+        lastDiagUrl = updated.diagramUrl;
+        dessiner(updated);
+        document.getElementById('adjDisp').textContent = lt.toFixed(0)+' mm';
+        document.getElementById('rVM') .textContent = vpi.toFixed(2)+' mm';
+        document.getElementById('rEM') .textContent = emont.toFixed(2)+' mm';
+        document.getElementById('rNBI').textContent = nbBar+' / intervalle';
+        document.getElementById('rNBT').textContent = nbTot+' barreaux';
+        document.getElementById('rEB') .textContent = ebarr>0?ebarr.toFixed(2)+' mm':'—';
+        document.getElementById('rVB') .textContent = vide.toFixed(2)+' mm';
+        const sm=document.getElementById('statusMsg');
+        if(conf) sm.innerHTML=`<div class="st-ok">✓ Conforme — Vide de ${vide.toFixed(2)} mm ≤ ${VIDE_MAX} mm (${(vide/VIDE_MAX*100).toFixed(1)} % du max)</div>`;
+        else     sm.innerHTML=`<div class="st-nok">✗ Non conforme — Vide de ${vide.toFixed(2)} mm dépasse ${VIDE_MAX} mm !</div>`;
+    }
+    renderTable();
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function renderTable() {
+    const wrap = document.getElementById('posWrap');
+    if (!positions.length) {
+        wrap.innerHTML='<div class="empty"><div class="ico">📐</div>Aucune position enregistrée — cliquez sur <strong>Nouvelle position</strong> pour commencer</div>';
+        return;
+    }
+    let h=`<div class="tbl-wrap"><table>
+        <thead><tr>
+            <th>N°</th><th>Référence</th><th>Longueur</th><th>Vide maco</th>
+            <th>Montants</th><th>Entraxe mont.</th><th>Barreaux tot.</th>
+            <th>Vide barr.</th><th>Statut</th><th>Actions</th>
+        </tr></thead><tbody>`;
+    positions.forEach((p,i)=>{
+        const ar  = p.id===currentEditId?'active-row':'';
+        const bdg = p.conf
+            ?'<span class="badge badge-ok">✓ Conforme</span>'
+            :'<span class="badge badge-nok">✗ Non conf.</span>';
+        const vm  = p.videMaco?p.videMaco.toFixed(0)+' mm':'—';
+        h+=`<tr class="${ar}">
+            <td>${i+1}</td>
+            <td><strong>${escHtml(p.ref)}</strong></td>
+            <td>
+                <div class="tbl-adj">
+                    <button class="tadj" onclick="ajusterPositionDirecte(${p.id},-10)" title="−10 mm">−10</button>
+                    <button class="tadj" onclick="ajusterPositionDirecte(${p.id},-1)"  title="−1 mm">−1</button>
+                    <span class="tadj-val">${p.lt.toFixed(0)}</span>
+                    <button class="tadj" onclick="ajusterPositionDirecte(${p.id},+1)"  title="+1 mm">+1</button>
+                    <button class="tadj" onclick="ajusterPositionDirecte(${p.id},+10)" title="+10 mm">+10</button>
+                </div>
+            </td>
+            <td>${vm}</td>
+            <td>${p.nm} (e:${p.dm} mm)</td>
+            <td>${p.emont.toFixed(2)} mm</td>
+            <td>${p.nbTot} (∅${p.db} mm)</td>
+            <td>${p.vide.toFixed(2)} mm</td>
+            <td>${bdg}</td>
+            <td style="white-space:nowrap">
+                <button class="btn btn-primary btn-sm" onclick="editerPosition(${p.id})">✏️</button>
+                <button class="btn btn-outline btn-sm" onclick="dupliquerPosition(${p.id})" title="Dupliquer et éditer">⧉</button>
+                <button class="btn btn-outline btn-sm" onclick="imprimerFicheId(${p.id})">🖨️</button>
+                <button class="btn btn-red btn-sm" onclick="supprimerPosition(${p.id})">🗑️</button>
+            </td>
+        </tr>`;
+    });
+    wrap.innerHTML=h+'</tbody></table></div>';
+}
+
+/* =====================================================
+   EXCEL EXPORT / IMPORT
+===================================================== */
+function exporterExcel() {
+    if (!positions.length) { alert('Aucune position à exporter.'); return; }
+    const data = positions.map((p,i)=>({
+        'N°': i+1,
+        'Chantier': p.chantier||'',
+        'Référence': p.ref,
+        'Longueur barrière (mm)': p.lt,
+        'Vide maçonnerie (mm)': p.videMaco??'',
+        'Retrait gauche (mm)': p.retraitG??'',
+        'Retrait droit (mm)': p.retraitD??'',
+        'Nb montants': p.nm,
+        'Dim. montant (mm)': p.dm,
+        'Dim. barreau (mm)': p.db,
+        'Vide entre montants (mm)': +p.vpi.toFixed(2),
+        'Entraxe montant (mm)': +p.emont.toFixed(2),
+        'Nb barreaux / intervalle': p.nbBar,
+        'Nb total barreaux': p.nbTot,
+        'Entraxe barreau (mm)': +p.ebarr.toFixed(2),
+        'Vide barreaux (mm)': +p.vide.toFixed(2),
+        'Conforme': p.conf?'OUI':'NON'
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws['!cols']=[4,20,22,20,20,16,15,12,16,16,22,18,22,16,18,16,10].map(w=>({wch:w}));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Garde-corps');
+    XLSX.writeFile(wb, `barreaudage_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+function importerExcel(inp) {
+    const file=inp.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+        try {
+            const wb   = XLSX.read(e.target.result,{type:'binary'});
+            const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            let count=0;
+            rows.forEach(row=>{
+                const lt=parseFloat(row['Longueur barrière (mm)']),
+                      nm=parseInt(row['Nb montants']),
+                      dm=parseFloat(row['Dim. montant (mm)']),
+                      db=parseFloat(row['Dim. barreau (mm)']);
+                if ([lt,nm,dm,db].some(isNaN)||nm<2) return;
+                const videTotal=lt-nm*dm; if(videTotal<=0) return;
+                const ni=nm-1, vpi=videTotal/ni;
+                let nbBar=0,vide=0,found=false;
+                if(vpi<=VIDE_MAX){vide=vpi;found=true;}
+                else{for(let n=1;n<=500;n++){const e=(vpi-n*db)/(n+1);if(e<=0)break;if(e<=VIDE_MAX){nbBar=n;vide=e;found=true;break;}}}
+                if(!found) return;
+                positions.push({
+                    id:Date.now()+count,
+                    chantier: row['Chantier']||'',
+                    ref: row['Référence']||('Import-'+(count+1)),
+                    lt,nm,dm,db,
+                    videMaco:parseFloat(row['Vide maçonnerie (mm)'])||null,
+                    retraitG:parseFloat(row['Retrait gauche (mm)'])||null,
+                    retraitD:parseFloat(row['Retrait droit (mm)'])||null,
+                    vpi,emont:vpi+dm,nbBar,nbTot:nbBar*ni,
+                    ebarr:nbBar>0?db+vide:0,vide,ni,conf:vide<=VIDE_MAX,diagramUrl:null
+                });
+                count++;
+            });
+            renderTable();
+            alert(`${count} position(s) importée(s) avec succès.`);
+        } catch(err){ alert('Erreur import : '+err.message); }
+    };
+    reader.readAsBinaryString(file);
+    inp.value='';
+}
+
+/* =====================================================
+   IMPRESSION
+===================================================== */
+function buildFiche(pos) {
+    const date    = new Date().toLocaleDateString('fr-CH');
+    const chStr   = pos.chantier ? `<div class="pf-chantier">🏗️ Chantier : <strong>${escHtml(pos.chantier)}</strong></div>` : '';
+    const macoHtml= pos.videMaco?`
+        <div class="pf-row"><span class="pfl">Vide maçonnerie</span><span class="pfv">${pos.videMaco.toFixed(0)} mm</span></div>
+        <div class="pf-row"><span class="pfl">Retrait G / D</span><span class="pfv">${pos.retraitG||0} / ${pos.retraitD||0} mm</span></div>`:'';
+    const stCls   = pos.conf?'pf-status-ok':'pf-status-nok';
+    const stTxt   = pos.conf
+        ?`✓ CONFORME — Vide ${pos.vide.toFixed(2)} mm ≤ ${VIDE_MAX} mm`
+        :`✗ NON CONFORME — Vide ${pos.vide.toFixed(2)} mm > ${VIDE_MAX} mm`;
+    const diagHtml= pos.diagramUrl
+        ?`<img class="pf-diag" src="${pos.diagramUrl}" alt="Schéma coté">`
+        :'<div style="padding:8px;text-align:center;color:#bbb;font-size:.8em;border:1px dashed #ddd;border-radius:6px;margin-bottom:12px;">Schéma non disponible (recalculer la position)</div>';
+
+    return `<div class="pf">
+        <div class="pf-header">
+            <div>
+                <h2>🔧 Fiche de Barreaudage</h2>
+                ${chStr}
+                <div class="pf-ref">${escHtml(pos.ref)}</div>
+            </div>
+            <div class="pf-meta">
+                <div>Date : ${date}</div>
+                <div>Vide max. régl. : ${VIDE_MAX} mm</div>
+            </div>
+        </div>
+
+        <div class="${stCls}">${stTxt}</div>
+
+        ${diagHtml}
+
+        <div class="pf-grid">
+            <div class="pf-box">
+                <h4>Paramètres</h4>
+                ${macoHtml}
+                <div class="pf-row"><span class="pfl">Longueur barrière</span><span class="pfv">${pos.lt.toFixed(0)} mm</span></div>
+                <div class="pf-row"><span class="pfl">Nombre de montants</span><span class="pfv">${pos.nm}</span></div>
+                <div class="pf-row"><span class="pfl">Dimension montant</span><span class="pfv">${pos.dm} mm</span></div>
+                <div class="pf-row"><span class="pfl">Dimension barreau</span><span class="pfv">${pos.db} mm</span></div>
+            </div>
+            <div class="pf-box">
+                <h4>Résultats</h4>
+                <div class="pf-row"><span class="pfl">Vide entre montants</span><span class="pfv">${pos.vpi.toFixed(2)} mm</span></div>
+                <div class="pf-row"><span class="pfl">Entraxe montant</span><span class="pfv">${pos.emont.toFixed(2)} mm</span></div>
+                <div class="pf-row"><span class="pfl">Barreaux / intervalle</span><span class="pfv">${pos.nbBar}</span></div>
+                <div class="pf-row"><span class="pfl">Barreaux total</span><span class="pfv">${pos.nbTot}</span></div>
+                <div class="pf-row"><span class="pfl">Entraxe barreau</span><span class="pfv">${pos.ebarr>0?pos.ebarr.toFixed(2)+' mm':'—'}</span></div>
+                <div class="pf-row" style="border-top:2px solid #667eea;margin-top:5px;padding-top:5px;">
+                    <span class="pfl"><strong>Vide entre barreaux</strong></span>
+                    <span class="pfv" style="font-size:1.1em;">${pos.vide.toFixed(2)} mm</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pf-sign">
+            <div class="pf-sign-box"><div class="pf-sign-label">Établi par</div></div>
+            <div class="pf-sign-box"><div class="pf-sign-label">Visé / Date</div></div>
+        </div>
+        <div class="pf-note">Calculateur de barreaudage — Créé par Dominique Rossier</div>
+    </div>`;
+}
+
+/* CSS partagé pour impression — injecté dans la fenêtre print */
+const PRINT_CSS = `
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:Arial,sans-serif;padding:18px 22px;color:#222;}
+    .pf-header{display:flex;justify-content:space-between;align-items:flex-start;
+        padding-bottom:10px;border-bottom:3px solid #667eea;margin-bottom:14px;}
+    .pf-header h2{color:#333;font-size:1.2em;margin-bottom:3px;}
+    .pf-chantier{color:#555;font-size:.88em;margin-top:2px;}
+    .pf-ref{color:#667eea;font-size:1em;font-weight:700;margin-top:2px;}
+    .pf-meta{text-align:right;font-size:.8em;color:#666;line-height:1.7;}
+    .pf-status-ok{background:#d4edda;color:#155724;padding:8px 14px;border-radius:7px;
+        text-align:center;font-weight:700;margin-bottom:12px;font-size:.88em;}
+    .pf-status-nok{background:#f8d7da;color:#721c24;padding:8px 14px;border-radius:7px;
+        text-align:center;font-weight:700;margin-bottom:12px;font-size:.88em;}
+    .pf-diag{width:100%;border:1px solid #ddd;border-radius:6px;margin-bottom:14px;display:block;}
+    .pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+    .pf-box{border:1px solid #ddd;border-radius:7px;padding:11px;}
+    .pf-box h4{font-size:.75em;text-transform:uppercase;letter-spacing:.5px;color:#667eea;
+        margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:5px;}
+    .pf-row{display:flex;justify-content:space-between;font-size:.83em;padding:3px 0;border-bottom:1px solid #f8f8f8;}
+    .pfl{color:#666;} .pfv{font-weight:700;color:#333;}
+    .pf-sign{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+    .pf-sign-box{border:1px solid #ddd;border-radius:7px;padding:9px 12px;min-height:52px;}
+    .pf-sign-label{font-size:.72em;color:#999;margin-bottom:5px;}
+    .pf-note{font-size:.7em;color:#bbb;text-align:right;margin-top:8px;}
+    /* Summary */
+    .pf-sum-table{width:100%;border-collapse:collapse;font-size:.8em;margin-top:10px;}
+    .pf-sum-table th{background:#667eea;color:white;padding:7px 9px;text-align:left;}
+    .pf-sum-table td{padding:6px 9px;border-bottom:1px solid #eee;vertical-align:middle;}
+    .pf-sum-table tr:nth-child(even) td{background:#f8f9fa;}
+    @media print{body{padding:10px 14px;}}
+`;
+
+function ouvrirFenetrePrint(htmlBody) {
+    const w = window.open('', '_blank', 'width=860,height=700');
+    if (!w) { alert('Popup bloquée — autorisez les popups pour ce site.'); return; }
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+        <title>Fiche Barreaudage</title>
+        <style>${PRINT_CSS}</style>
+        </head><body>${htmlBody}</body></html>`);
+    w.document.close();
+    // Attendre que les images (base64) soient chargées avant impression
+    const imgs = w.document.images;
+    if (imgs.length === 0) {
+        w.focus(); w.print();
+    } else {
+        let loaded = 0;
+        const tryPrint = () => { if (++loaded >= imgs.length) { w.focus(); w.print(); } };
+        Array.from(imgs).forEach(img => {
+            if (img.complete) tryPrint();
+            else { img.onload = tryPrint; img.onerror = tryPrint; }
+        });
+    }
+}
+
+function imprimerFicheActive() {
+    if (!lastResult) { alert('Aucun résultat à imprimer.'); return; }
+    const pos = currentEditId!==null
+        ? (positions.find(p=>p.id===currentEditId)||lastResult)
+        : lastResult;
+    if (!pos.diagramUrl && lastDiagUrl) pos.diagramUrl = lastDiagUrl;
+    ouvrirFenetrePrint(buildFiche(pos));
+}
+
+function imprimerFicheId(id) {
+    const pos = positions.find(p=>p.id===id);
+    if (!pos) return;
+    ouvrirFenetrePrint(buildFiche(pos));
+}
+
+function imprimerTout() {
+    if (!positions.length) { alert('Aucune position à imprimer.'); return; }
+    const date = new Date().toLocaleDateString('fr-CH');
+    const ok   = positions.filter(p=>p.conf).length;
+    const chantierName = document.getElementById('nomChantier').value.trim() || positions[0]?.chantier || '';
+    const rows = positions.map((p,i)=>{
+        const c = p.conf
+            ?'<span style="color:#155724;font-weight:700">✓ OUI</span>'
+            :'<span style="color:#721c24;font-weight:700">✗ NON</span>';
+        return `<tr>
+            <td>${i+1}</td><td><strong>${escHtml(p.ref)}</strong></td>
+            <td>${p.lt.toFixed(0)}</td>
+            <td>${p.videMaco?p.videMaco.toFixed(0)+' mm<br><small style="color:#888">−${p.retraitG||0}/−${p.retraitD||0}</small>':'—'}</td>
+            <td>${p.nm} × e:${p.dm}mm</td>
+            <td>${p.emont.toFixed(2)} mm</td>
+            <td>${p.nbTot} × ∅${p.db}</td>
+            <td>${p.vide.toFixed(2)} mm</td><td>${c}</td>
+        </tr>`;
+    }).join('');
+
+    ouvrirFenetrePrint(`
+        <div class="pf-header">
+            <div>
+                <h2>🔧 Récapitulatif — Garde-corps</h2>
+                ${chantierName?`<div class="pf-chantier">🏗️ Chantier : <strong>${escHtml(chantierName)}</strong></div>`:''}
+                <div style="color:#888;font-size:.82em;margin-top:3px;">
+                    ${positions.length} position(s) — ${ok} conforme(s) / ${positions.length-ok} non conforme(s)
+                </div>
+            </div>
+            <div class="pf-meta"><div>Date : ${date}</div><div>Vide max. : ${VIDE_MAX} mm</div></div>
+        </div>
+        <table class="pf-sum-table">
+            <thead><tr>
+                <th>N°</th><th>Référence</th><th>Longueur</th><th>Vide maco</th>
+                <th>Montants</th><th>Entraxe mont.</th><th>Barreaux</th>
+                <th>Vide barr.</th><th>Conf.</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+        <div class="pf-note">Calculateur de barreaudage — Créé par Dominique Rossier</div>
+    `);
+}
+</script>
+</body>
+</html>

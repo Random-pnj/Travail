@@ -1,0 +1,2163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BARREAUDAGE CALC</title>
+<style>
+:root {
+    --bg:       #0d1117;
+    --s1:       #161b22;
+    --s2:       #21262d;
+    --s3:       #30363d;
+    --border:   #30363d;
+    --accent:   #2dd4bf;
+    --accent2:  #818cf8;
+    --purple:   #a78bfa;
+    --green:    #34d399;
+    --red:      #f87171;
+    --yellow:   #fbbf24;
+    --text:     #e6edf3;
+    --muted:    #7d8590;
+    --mono:     'Consolas','SF Mono','Courier New',monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body {
+    font-family: 'Segoe UI',system-ui,sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* ── HEADER ─────────────────────────── */
+.hdr {
+    background: var(--s1);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    min-height: 56px;
+}
+.hdr-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.hdr-logo {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+}
+.hdr-title {
+    font-family: var(--mono);
+    font-size: .95em;
+    font-weight: 700;
+    letter-spacing: .05em;
+    color: var(--text);
+}
+.hdr-sub {
+    font-size: .72em;
+    color: var(--muted);
+    letter-spacing: .04em;
+    margin-top: 1px;
+}
+.hdr-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* ── CHANTIER BAR ────────────────────── */
+.chantier-bar {
+    background: var(--s2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.chantier-bar label {
+    font-size: .75em;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--accent);
+    font-weight: 700;
+    white-space: nowrap;
+}
+.chantier-bar input {
+    flex: 1;
+    max-width: 380px;
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: .88em;
+    font-family: var(--mono);
+    transition: border-color .2s, box-shadow .2s;
+}
+.chantier-bar input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45,212,191,.12);
+}
+.chantier-bar input::placeholder { color: var(--muted); }
+
+/* ── MAIN LAYOUT ─────────────────────── */
+.main {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    min-height: calc(100vh - 57px - 42px);
+}
+
+.pane-left {
+    background: var(--s1);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.pane-right {
+    background: var(--bg);
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ── SECTION HEADERS ─────────────────── */
+.sec-head {
+    font-size: .7em;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    font-weight: 700;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.sec-head span { color: var(--accent); }
+
+/* ── FORM FIELDS ─────────────────────── */
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label {
+    font-size: .75em;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    font-weight: 600;
+}
+.fg input {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: .95em;
+    font-family: var(--mono);
+    transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+}
+.fg input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45,212,191,.12);
+}
+.fg input::placeholder { color: var(--s3); }
+.fg input::-webkit-inner-spin-button { opacity: .5; }
+
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+/* ── MACO TOGGLE ─────────────────────── */
+.maco-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    background: rgba(129,140,248,.08);
+    border: 1px solid rgba(129,140,248,.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: .78em;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    transition: background .2s, border-color .2s;
+}
+.maco-toggle:hover { background: rgba(129,140,248,.14); border-color: var(--accent2); }
+.maco-arrow { transition: transform .25s; font-size: .8em; }
+.maco-arrow.open { transform: rotate(90deg); }
+.maco-body {
+    background: rgba(129,140,248,.06);
+    border: 1px solid rgba(129,140,248,.2);
+    border-radius: 0 0 6px 6px;
+    padding: 14px;
+    margin-top: -4px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+.maco-body.open { display: flex; }
+
+        /* SUB SECTION LABELS */
+        .sec-sub {
+            font-size: .68em; text-transform: uppercase; letter-spacing: .09em;
+            color: var(--accent2); font-weight: 700; margin: 10px 0 5px;
+        }
+        .sec-note {
+            font-size: .73em; color: var(--muted); margin-bottom: 8px;
+            font-style: italic; padding: 5px 8px;
+            background: rgba(255,255,255,.03); border-radius: 4px;
+            border-left: 2px solid var(--accent2);
+        }
+        .fg input[readonly] { opacity: .55; }
+
+        /* STEP HEADERS */
+        .step-head {
+            font-size: .78em; font-weight: 900; letter-spacing: .08em;
+            text-transform: uppercase; color: var(--text);
+            background: linear-gradient(135deg, rgba(45,212,191,.15), rgba(129,140,248,.1));
+            border: 1px solid rgba(45,212,191,.25);
+            border-radius: 7px; padding: 8px 12px; margin-bottom: 12px;
+        }
+        .step-divider {
+            font-size: .68em; text-transform: uppercase; letter-spacing: .1em;
+            color: var(--accent2); font-weight: 700;
+            border-bottom: 1px solid rgba(129,140,248,.3);
+            padding-bottom: 5px; margin: 12px 0 8px;
+        }
+
+        /* SECTION ROW (profilé avec preview Ø) */
+        .sec-row {
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            background: var(--s2);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 8px 10px;
+        }
+        .sec-row-label {
+            font-size: .72em; text-transform: uppercase; letter-spacing: .06em;
+            color: var(--muted); font-weight: 700; white-space: nowrap;
+        }
+        .sec-row-inputs {
+            display: flex; align-items: center; gap: 5px;
+        }
+        .sec-row-inputs input.sec-a,
+        .sec-row-inputs input.sec-b {
+            width: 72px; padding: 6px 7px; font-size: .88em;
+            background: var(--s1); border: 1px solid var(--border);
+            border-radius: 5px; color: var(--text);
+            font-family: var(--mono); transition: border-color .2s;
+        }
+        .sec-row-inputs input:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(45,212,191,.12);
+        }
+        .sec-times { color: var(--muted); font-size: .85em; }
+        .sec-preview {
+            font-family: var(--mono); font-size: .88em; font-weight: 700;
+            color: var(--accent); min-width: 72px; text-align: right;
+            white-space: nowrap;
+        }
+
+        /* LISTE DE DÉBITAGE */
+        .debitage-box {
+            background: var(--s2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+        }
+        .deb-table { width: 100%; border-collapse: collapse; font-size: .82em; }
+        .deb-table th {
+            background: var(--s3);
+            color: var(--muted);
+            padding: 6px 9px;
+            text-align: left;
+            font-size: .7em;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            border-bottom: 1px solid var(--border);
+        }
+        .deb-table td {
+            padding: 6px 9px;
+            border-bottom: 1px solid rgba(48,54,61,.5);
+            font-family: var(--mono);
+            font-size: .88em;
+        }
+        .deb-table tr:last-child td { border-bottom: none; }
+        .deb-table .deb-rep { color: var(--accent); font-weight: 700; }
+        .deb-table .deb-total { color: var(--muted); font-size: .8em; }
+        .deb-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            gap: 20px;
+            font-size: .8em;
+            color: var(--muted);
+            font-family: var(--mono);
+        }
+        .deb-footer span { color: var(--text); font-weight: 700; }
+
+        .fil2-check-row {
+            display: flex; align-items: center; gap: 9px;
+            cursor: pointer; user-select: none;
+            padding: 8px 0; margin-top: 4px;
+            font-size: .82em; font-weight: 700;
+            color: var(--accent2);
+            letter-spacing: .04em;
+        }
+        .fil2-check-row:hover { color: var(--text); }
+
+        /* FILIÈRE HAUTE TOGGLE */
+        .fil2-toggle {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            background: rgba(129,140,248,.08); border: 1px solid rgba(129,140,248,.2);
+            border-radius: 6px; padding: 8px 12px; margin-top: 8px;
+            transition: background .2s;
+        }
+        .fil2-toggle:hover { background: rgba(129,140,248,.14); }
+        .fil2-body {
+            background: rgba(129,140,248,.06); border: 1px solid rgba(129,140,248,.2);
+            border-top: none; border-radius: 0 0 6px 6px;
+            padding: 12px; display: none; flex-direction: column; gap: 10px;
+        }
+        .fil2-body.open { display: flex; }
+.maco-calc {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--s2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: .82em;
+    gap: 10px;
+    flex-wrap: wrap;
+    border: 1px solid var(--border);
+}
+.maco-calc strong { color: var(--accent); font-family: var(--mono); font-size: 1.1em; }
+
+/* ── BUTTONS ─────────────────────────── */
+.btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 13px;
+    border: none; border-radius: 6px;
+    font-size: .8em; font-weight: 700;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s, box-shadow .15s;
+    letter-spacing: .03em;
+    white-space: nowrap;
+}
+.btn:hover { opacity: .85; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.btn-accent  { background: var(--accent);  color: #0d1117; }
+.btn-purple  { background: var(--accent2); color: #fff; }
+.btn-green   { background: var(--green);   color: #0d1117; }
+.btn-red     { background: var(--red);     color: #0d1117; }
+.btn-ghost   { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-sm      { padding: 4px 9px; font-size: .75em; border-radius: 5px; }
+
+.btn-calc {
+    width: 100%;
+    padding: 11px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0d1117;
+    font-weight: 900;
+    font-size: .9em;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border: none; border-radius: 6px;
+    cursor: pointer;
+    transition: box-shadow .2s, transform .1s;
+    margin-top: 4px;
+}
+.btn-calc:hover { box-shadow: 0 0 20px rgba(45,212,191,.35); transform: translateY(-1px); }
+
+/* ── RESULTS PLACEHOLDER ─────────────── */
+.res-placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--muted);
+    text-align: center;
+    padding: 40px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+}
+.res-placeholder .ico { font-size: 2.4em; opacity: .4; }
+.res-placeholder p { font-size: .82em; }
+
+/* ── RESULT ROWS ─────────────────────── */
+.rrow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--s2);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+.rrow.hl { border-color: var(--accent); box-shadow: 0 0 8px rgba(45,212,191,.1); }
+.rrow.hl-red { border-color: var(--red); box-shadow: 0 0 8px rgba(248,113,113,.15); }
+.rl { font-size: .78em; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+.rv { font-family: var(--mono); font-size: 1em; font-weight: 700; color: var(--accent); }
+.rv-danger { color: var(--red) !important; }
+
+/* ── STATUS ──────────────────────────── */
+.st-ok {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(52,211,153,.1);
+    border: 1px solid rgba(52,211,153,.3);
+    color: var(--green);
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-size: .8em; font-weight: 700;
+}
+.st-nok {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(248,113,113,.1);
+    border: 1px solid rgba(248,113,113,.3);
+    color: var(--red);
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-size: .8em; font-weight: 700;
+    animation: pulse-red .8s ease infinite alternate;
+}
+@keyframes pulse-red { from { box-shadow: none; } to { box-shadow: 0 0 12px rgba(248,113,113,.3); } }
+
+/* ── ADJUST PANELS ───────────────────── */
+.adj-panel {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 11px;
+    display: none;
+}
+.adj-panel.show { display: block; }
+.adj-label {
+    font-size: .7em; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); font-weight: 700; margin-bottom: 8px;
+}
+.adj-row {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.btn-adj {
+    padding: 6px 12px;
+    background: var(--s3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 5px;
+    font-size: .8em; font-weight: 700;
+    cursor: pointer;
+    font-family: var(--mono);
+    transition: background .15s, border-color .15s, box-shadow .15s;
+}
+.btn-adj:hover { background: var(--accent); color: #0d1117; border-color: var(--accent); box-shadow: 0 0 10px rgba(45,212,191,.3); }
+.btn-adj-red:hover { background: var(--red); color: #0d1117; border-color: var(--red); box-shadow: 0 0 10px rgba(248,113,113,.3); }
+.adj-disp {
+    font-family: var(--mono);
+    font-size: .95em;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 80px;
+    text-align: center;
+    background: var(--s1);
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    padding: 5px 8px;
+}
+
+/* ── DIAGRAM ─────────────────────────── */
+.diag-box {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+}
+.diag-box h4 {
+    font-size: .7em; text-transform: uppercase;
+    letter-spacing: .09em; color: var(--muted);
+    margin-bottom: 10px; font-weight: 700;
+}
+#diagCanvas { display: block; width: 100%; border-radius: 4px; }
+
+/* ── RES ACTIONS ─────────────────────── */
+.res-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── POSITIONS TABLE ─────────────────── */
+.tbl-section {
+    background: var(--s1);
+    border-top: 1px solid var(--border);
+    padding: 20px 24px;
+}
+.tbl-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 10px;
+}
+.tbl-section-title {
+    font-size: .7em;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--accent);
+    font-weight: 700;
+}
+.tbl-count {
+    font-family: var(--mono);
+    font-size: .72em;
+    color: var(--muted);
+}
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .82em; }
+table th {
+    background: var(--s2);
+    color: var(--muted);
+    padding: 7px 10px;
+    text-align: left;
+    font-size: .7em;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(48,54,61,.6);
+    vertical-align: middle;
+    font-size: .88em;
+}
+table tr:hover td { background: rgba(255,255,255,.02); }
+table tr.active-row td { background: rgba(45,212,191,.05); border-left: 2px solid var(--accent); }
+.mono { font-family: var(--mono); }
+.badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: .72em; font-weight: 700;
+    letter-spacing: .03em;
+}
+.badge::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+.badge-ok  { background: rgba(52,211,153,.12); color: var(--green); border: 1px solid rgba(52,211,153,.3); }
+.badge-ok::before  { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.badge-nok { background: rgba(248,113,113,.12); color: var(--red);   border: 1px solid rgba(248,113,113,.3); }
+.badge-nok::before { background: var(--red); animation: blink .7s ease infinite alternate; }
+@keyframes blink { from { opacity:1; } to { opacity:.3; } }
+
+/* ── TABLE INLINE ADJUST ─────────────── */
+.tbl-adj { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+.tadj {
+    padding: 2px 6px;
+    background: var(--s3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    font-size: .72em; font-weight: 700;
+    cursor: pointer;
+    font-family: var(--mono);
+    transition: all .12s;
+}
+.tadj:hover { background: var(--accent); color: #0d1117; border-color: var(--accent); }
+.tadj-val {
+    font-family: var(--mono);
+    font-size: .82em;
+    font-weight: 700;
+    color: var(--text);
+    min-width: 50px;
+    text-align: center;
+    padding: 2px 4px;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+/* ── EMPTY STATE ─────────────────────── */
+.empty {
+    text-align: center; padding: 32px; color: var(--muted); font-size: .85em;
+}
+.empty .ico { font-size: 2em; opacity: .3; margin-bottom: 8px; }
+
+/* ── FOOTER ──────────────────────────── */
+.app-footer {
+    text-align: center;
+    font-size: .7em;
+    color: var(--muted);
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    letter-spacing: .05em;
+}
+
+/* ── RESPONSIVE ──────────────────────── */
+@media (max-width: 860px) {
+    .main { grid-template-columns: 1fr; }
+    .pane-left { border-right: none; border-bottom: 1px solid var(--border); }
+    .g3 { grid-template-columns: 1fr; }
+    .hdr { padding: 10px 14px; }
+    .chantier-bar { padding: 8px 14px; }
+    .tbl-section { padding: 16px 14px; }
+}
+@media (max-width: 540px) {
+    .g2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="hdr">
+    <div class="hdr-brand">
+        <div class="hdr-logo">⊞</div>
+        <div>
+            <div class="hdr-title">BARREAUDAGE CALC</div>
+            <div class="hdr-sub">vide max. réglementaire 119 mm</div>
+        </div>
+    </div>
+    <div class="hdr-actions">
+        <button class="btn btn-ghost btn-sm" onclick="nouvellePosition()">＋ Nouvelle position</button>
+        <button class="btn btn-green btn-sm" onclick="exporterExcel()">↓ Excel</button>
+        <button class="btn btn-purple btn-sm" onclick="document.getElementById('fileImport').click()">↑ Import</button>
+        <input type="file" id="fileImport" accept=".xlsx,.xls" style="display:none" onchange="importerExcel(this)">
+        <button class="btn btn-ghost btn-sm" onclick="imprimerTout()">⎙ Récap.</button>
+    </div>
+</header>
+
+<!-- ── CHANTIER BAR ── -->
+<div class="chantier-bar">
+    <label>⊕ Chantier</label>
+    <input type="text" id="nomChantier" placeholder="Nom du chantier…">
+</div>
+
+<!-- ── MAIN SPLIT ── -->
+<div class="main">
+
+    <!-- LEFT: FORM -->
+    <div class="pane-left" id="formCard">
+
+        <div class="sec-head"><span>▸</span> <span id="formTitle">NOUVELLE POSITION</span></div>
+
+        <div class="fg">
+            <label>Référence / Position</label>
+            <input type="text" id="posRef" placeholder="GC-01, Balcon Nord…">
+        </div>
+
+        <!-- MACO TOGGLE -->
+        <div class="maco-toggle" onclick="toggleMaco()">
+            <span class="maco-arrow" id="macoArrow">▶</span>
+            🧱 Calcul depuis vide maçonnerie
+        </div>
+        <div class="maco-body" id="macoBody">
+            <div class="g3">
+                <div class="fg">
+                    <label>Vide maco. (mm)</label>
+                    <input type="number" id="videMaco" placeholder="2200" min="0" step="1" oninput="calcMaco()">
+                </div>
+                <div class="fg">
+                    <label>Retrait G. (mm)</label>
+                    <input type="number" id="retraitG" placeholder="50" min="0" step="1" oninput="calcMaco()">
+                </div>
+                <div class="fg">
+                    <label>Retrait D. (mm)</label>
+                    <input type="number" id="retraitD" placeholder="50" min="0" step="1" oninput="calcMaco()">
+                </div>
+            </div>
+            <div class="maco-calc" id="macoResult">
+                <span style="font-size:.8em;color:var(--muted)">Longueur calculée :</span>
+                <strong id="macoVal">—</strong>
+                <button class="btn btn-accent btn-sm" onclick="appliquerMaco()">↓ Appliquer</button>
+            </div>
+        </div>
+
+        <!-- ═══ ÉTAPE 1 : GÉOMÉTRIE & HAUTEURS ═══ -->
+        <div class="step-head">① GÉOMÉTRIE &amp; HAUTEURS</div>
+
+        <div class="fg">
+            <label>Longueur totale barrière (mm)</label>
+            <input type="number" id="longueurTotale" placeholder="2080" min="0" step="1">
+        </div>
+        <div class="fg">
+            <label>Nombre total de montants</label>
+            <input type="number" id="nombreMontants" placeholder="3" min="2" step="1">
+        </div>
+
+        <div class="step-divider">Hauteurs</div>
+
+        <div class="fg">
+            <label>Hauteur totale — dessus main courante (mm)</label>
+            <input type="number" id="hTotal" placeholder="1020" value="1020" min="0" step="1">
+        </div>
+
+        <div class="sec-sub">Filière basse</div>
+        <div class="fg">
+            <label>Dessus depuis sol (mm)</label>
+            <input type="number" id="filiereY" placeholder="100" value="100" min="0" step="1">
+        </div>
+
+        <div class="sec-sub">Plaque de base</div>
+        <div class="fg">
+            <label>Largeur × épaisseur (mm)</label>
+            <div style="display:flex;gap:6px;max-width:200px">
+                <input type="number" id="bpW" placeholder="100" value="100" min="0" step="1" style="flex:1">
+                <input type="number" id="bpH" placeholder="8" value="8" min="0" step="1" style="flex:1">
+            </div>
+        </div>
+
+        <!-- Filière haute — checkbox seule, cochée par défaut -->
+        <label class="fil2-check-row">
+            <input type="checkbox" id="fil2Check" onchange="toggleFil2()" checked
+                style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer;">
+            <span>Filière haute (sous main courante)</span>
+        </label>
+        <div class="fil2-body open" id="fil2Body">
+            <div class="fg">
+                <label>Dessus depuis dessous MC (mm)</label>
+                <input type="number" id="fil2Dist" placeholder="100" value="100" min="0" step="1">
+            </div>
+        </div>
+
+        <!-- ═══ ÉTAPE 2 : SECTIONS PROFILÉS ═══ -->
+        <div class="step-head" style="margin-top:18px">② SECTIONS PROFILÉS</div>
+        <div class="sec-note">1 valeur = <strong style="color:var(--accent)">Ø rond</strong> &nbsp;|&nbsp; 2 valeurs = face vis. × prof. &nbsp;(ex: 10×30mm)</div>
+
+        <!-- 1. Montant -->
+        <div class="sec-row" id="secRow_montant">
+            <div class="sec-row-label">Montant</div>
+            <div class="sec-row-inputs">
+                <input type="number" id="dimensionMontant" class="sec-a" placeholder="40" value="40" min="0" step="1"
+                    oninput="updateSecPreview('montant')">
+                <span class="sec-times">×</span>
+                <input type="number" id="dm2" class="sec-b" placeholder="prof." value="40" min="0" step="1"
+                    oninput="updateSecPreview('montant')">
+            </div>
+            <div class="sec-preview" id="secPrev_montant">40×40 mm</div>
+        </div>
+
+        <!-- 2. Barreau -->
+        <div class="sec-row" id="secRow_barreau">
+            <div class="sec-row-label">Barreau</div>
+            <div class="sec-row-inputs">
+                <input type="number" id="dimensionBarreau" class="sec-a" placeholder="10" value="10" min="0" step="1"
+                    oninput="updateSecPreview('barreau')">
+                <span class="sec-times">×</span>
+                <input type="number" id="db2" class="sec-b" placeholder="prof." value="30" min="0" step="1"
+                    oninput="updateSecPreview('barreau')">
+            </div>
+            <div class="sec-preview" id="secPrev_barreau">10×30 mm</div>
+        </div>
+
+        <!-- 3. Main courante -->
+        <div class="sec-row">
+            <div class="sec-row-label">Main cour.</div>
+            <div class="sec-row-inputs">
+                <input type="number" id="mcW" class="sec-a" placeholder="10" value="10" min="0" step="1"
+                    oninput="updateSecPreview('mc')">
+                <span class="sec-times">×</span>
+                <input type="number" id="mcH2" class="sec-b" placeholder="prof." value="50" min="0" step="1"
+                    oninput="updateSecPreview('mc')">
+            </div>
+            <div class="sec-preview" id="secPrev_mc">10×50 mm</div>
+        </div>
+
+        <!-- 4. Filière haute (si cochée) — affichée par défaut -->
+        <div id="fil2WRow">
+            <div class="sec-row">
+                <div class="sec-row-label">Fil. haute</div>
+                <div class="sec-row-inputs">
+                    <input type="number" id="fil2W" class="sec-a" placeholder="10" value="10" min="0" step="1"
+                        oninput="this.dataset.manual='1';updateSecPreview('filhaut')">
+                    <span class="sec-times">×</span>
+                    <input type="number" id="fil2H2" class="sec-b" placeholder="prof." value="40" min="0" step="1"
+                        oninput="this.dataset.manual='1';updateSecPreview('filhaut')">
+                </div>
+                <div class="sec-preview" id="secPrev_filhaut">10×40 mm</div>
+            </div>
+        </div>
+
+        <!-- 5. Filière basse -->
+        <div class="sec-row">
+            <div class="sec-row-label">Fil. basse</div>
+            <div class="sec-row-inputs">
+                <input type="number" id="filiereW" class="sec-a" placeholder="10" value="10" min="0" step="1"
+                    oninput="updateSecPreview('filbasse');syncFil2Section()">
+                <span class="sec-times">×</span>
+                <input type="number" id="filiereH2" class="sec-b" placeholder="prof." value="40" min="0" step="1"
+                    oninput="updateSecPreview('filbasse');syncFil2Section()">
+            </div>
+            <div class="sec-preview" id="secPrev_filbasse">10×40 mm</div>
+        </div>
+
+        <button class="btn-calc" onclick="calculer()">▶ CALCULER</button>
+
+    </div>
+
+    <!-- RIGHT: RESULTS -->
+    <div class="pane-right" id="paneRight">
+
+        <!-- Placeholder -->
+        <div class="res-placeholder" id="resPlaceholder">
+            <div class="ico">⊞</div>
+            <p>Renseignez les paramètres<br>et lancez le calcul</p>
+        </div>
+
+        <!-- Results (hidden until calc) -->
+        <div id="resultsBox" style="display:none; flex-direction:column; gap:10px;">
+
+            <div class="sec-head"><span>▸</span> RÉSULTATS</div>
+
+            <div class="rrow"><span class="rl">Vide entre montants</span><span class="rv" id="rVM">—</span></div>
+            <div class="rrow hl"><span class="rl">Entraxe montant c/c</span><span class="rv" id="rEM">—</span></div>
+            <div class="rrow"><span class="rl">Barreaux / intervalle</span><span class="rv" id="rNBI">—</span></div>
+            <div class="rrow"><span class="rl">Barreaux total</span><span class="rv" id="rNBT">—</span></div>
+            <div class="rrow"><span class="rl">Entraxe barreau c/c</span><span class="rv" id="rEB">—</span></div>
+            <div class="rrow hl" id="rrowVB"><span class="rl">Vide entre barreaux</span><span class="rv" id="rVB">—</span></div>
+
+            <div id="statusMsg"></div>
+
+            <!-- ADJUST LONGUEUR -->
+            <div class="adj-panel show" id="adjPanel" style="display:none">
+                <div class="adj-label">↔ Longueur barrière</div>
+                <div class="adj-row">
+                    <button class="btn-adj" onclick="ajusterLongueur(-10)">−10</button>
+                    <button class="btn-adj" onclick="ajusterLongueur(-1)">−1</button>
+                    <span class="adj-disp" id="adjDisp">—</span>
+                    <button class="btn-adj" onclick="ajusterLongueur(+1)">+1</button>
+                    <button class="btn-adj" onclick="ajusterLongueur(+10)">+10</button>
+                </div>
+            </div>
+
+            <!-- ADJUST BARREAUX -->
+            <div class="adj-panel" id="adjBarrPanel" style="display:none">
+                <div class="adj-label">↕ Barreaux / intervalle</div>
+                <div class="adj-row">
+                    <button class="btn-adj btn-adj-red" onclick="ajusterBarreaux(-1)">−1 barreau</button>
+                    <span class="adj-disp" id="adjBarrDisp">—</span>
+                    <button class="btn-adj" onclick="ajusterBarreaux(+1)">+1 barreau</button>
+                </div>
+                <div style="font-size:.7em;color:var(--muted);text-align:center;margin-top:6px;">
+                    Auto = minimum réglementaire
+                </div>
+            </div>
+
+            <!-- DIAGRAM -->
+            <div class="diag-box">
+                <h4>◈ Schéma coté</h4>
+                <canvas id="diagCanvas"></canvas>
+            </div>
+
+            <!-- LISTE DE DÉBITAGE -->
+            <div class="debitage-box" id="debitageBox" style="display:none">
+                <div class="sec-head" style="margin-bottom:10px"><span>▸</span> LISTE DE DÉBITAGE</div>
+                <div id="debitageContent"></div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="res-actions">
+                <button class="btn btn-accent" onclick="sauvegarderPosition()">↓ Sauvegarder</button>
+                <button class="btn btn-ghost" onclick="imprimerFicheActive()">⎙ Imprimer fiche</button>
+                <button class="btn btn-ghost" onclick="exporterDXF()" title="Exporter en DXF pour AutoCAD">⬡ DXF</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── POSITIONS TABLE ── -->
+<div class="tbl-section">
+    <div class="tbl-section-head">
+        <div>
+            <div class="tbl-section-title">◈ Positions de garde-corps</div>
+            <div class="tbl-count" id="tblCount"></div>
+        </div>
+    </div>
+    <div class="tbl-wrap">
+        <div id="posWrap">
+            <div class="empty"><div class="ico">◈</div>Aucune position enregistrée</div>
+        </div>
+    </div>
+</div>
+
+<div class="app-footer">BARREAUDAGE CALC — Dominique Rossier</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const VIDE_MAX = 119;
+let positions     = [];
+let currentEditId = null;
+let lastResult    = null;
+let lastDiagUrl   = null;
+
+/* ── MACO ── */
+function toggleMaco() {
+    const body  = document.getElementById('macoBody');
+    const arrow = document.getElementById('macoArrow');
+    const open  = body.classList.toggle('open');
+    arrow.classList.toggle('open', open);
+    if (!open) {
+        ['videMaco','retraitG','retraitD'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('macoResult').style.display='none';
+    }
+}
+function calcMaco() {
+    const vm=parseFloat(document.getElementById('videMaco').value);
+    const rG=parseFloat(document.getElementById('retraitG').value)||0;
+    const rD=parseFloat(document.getElementById('retraitD').value)||0;
+    const div=document.getElementById('macoResult');
+    if (!isNaN(vm)&&vm>0) {
+        document.getElementById('macoVal').textContent=(vm-rG-rD).toFixed(0)+' mm';
+        div.style.display='flex';
+    } else { div.style.display='none'; }
+}
+function appliquerMaco() {
+    const vm=parseFloat(document.getElementById('videMaco').value);
+    const rG=parseFloat(document.getElementById('retraitG').value)||0;
+    const rD=parseFloat(document.getElementById('retraitD').value)||0;
+    if (!isNaN(vm)&&vm>0) document.getElementById('longueurTotale').value=Math.round(vm-rG-rD);
+    autoRecalc();
+}
+
+/* ── SECTION HELPERS ── */
+function secStr(a, b) {
+    a = parseFloat(a) || 0;
+    b = parseFloat(b) || 0;
+    if (!a) return '—';
+    if (!b || b === a) return `Ø ${a}`;
+    return `${a}×${b}`;
+}
+
+const SEC_MAP = {
+    montant:  { a:'dimensionMontant', b:'dm2',      prev:'secPrev_montant' },
+    barreau:  { a:'dimensionBarreau', b:'db2',       prev:'secPrev_barreau' },
+    filbasse: { a:'filiereW',         b:'filiereH2', prev:'secPrev_filbasse' },
+    mc:       { a:'mcW',              b:'mcH2',      prev:'secPrev_mc' },
+    filhaut:  { a:'fil2W',            b:'fil2H2',    prev:'secPrev_filhaut' },
+};
+
+function updateSecPreview(key) {
+    const m = SEC_MAP[key]; if (!m) return;
+    const aV = document.getElementById(m.a)?.value;
+    const bV = document.getElementById(m.b)?.value;
+    const el = document.getElementById(m.prev);
+    if (el) el.textContent = secStr(aV, bV) + ' mm';
+    autoRecalc();
+}
+
+function updateAllPreviews() {
+    Object.keys(SEC_MAP).forEach(updateSecPreview);
+}
+
+// Sync filière haute section = filière basse si les valeurs sont identiques (encore "liées")
+function syncFil2Section() {
+    const fW  = document.getElementById('filiereW').value;
+    const fH2 = document.getElementById('filiereH2').value;
+    const f2W = document.getElementById('fil2W');
+    const f2H2= document.getElementById('fil2H2');
+    // Sync uniquement si la filière haute n'a pas été modifiée différemment
+    if (!document.getElementById('fil2Check').checked) return;
+    // Si fil2W est vide ou identique à l'ancienne valeur de filiereW, suivre
+    if (!f2W.dataset.manual) f2W.value = fW;
+    if (!f2H2.dataset.manual) f2H2.value = fH2;
+    updateSecPreview('filhaut');
+}
+
+function toggleFil2() {
+    const cb   = document.getElementById('fil2Check');
+    const body = document.getElementById('fil2Body');
+    const wrow = document.getElementById('fil2WRow');
+    body.classList.toggle('open', cb.checked);
+    wrow.style.display = cb.checked ? 'block' : 'none';
+    autoRecalc();
+}
+
+/* ── CALCUL ── */
+function calculer() {
+    const lt=parseFloat(document.getElementById('longueurTotale').value);
+    const nm=parseInt(document.getElementById('nombreMontants').value);
+    const dm=parseFloat(document.getElementById('dimensionMontant').value);
+    const db=parseFloat(document.getElementById('dimensionBarreau').value);
+
+    if ([lt,nm,dm,db].some(isNaN)) { alert('Remplir tous les champs.'); return; }
+    if (nm<2) { alert('Minimum 2 montants.'); return; }
+    const videTotal=lt-nm*dm;
+    if (videTotal<=0) { alert('Longueur insuffisante pour les montants.'); return; }
+
+    const ni=nm-1, vpi=videTotal/ni;
+    let nbBar=0,vide=0,found=false;
+    if (vpi<=VIDE_MAX){vide=vpi;found=true;}
+    else{for(let n=1;n<=500;n++){const e=(vpi-n*db)/(n+1);if(e<=0)break;if(e<=VIDE_MAX){nbBar=n;vide=e;found=true;break;}}}
+    if (!found){alert('Configuration impossible.');return;}
+
+    const nbTot=nbBar*ni, emont=vpi+dm, ebarr=nbBar>0?db+vide:0, conf=vide<=VIDE_MAX;
+    lastResult={
+        ref:document.getElementById('posRef').value.trim()||'Sans nom',
+        chantier:document.getElementById('nomChantier').value.trim(),
+        lt,nm,dm,db,
+        videMaco:parseFloat(document.getElementById('videMaco').value)||null,
+        retraitG:parseFloat(document.getElementById('retraitG').value)||null,
+        retraitD:parseFloat(document.getElementById('retraitD').value)||null,
+        hTotal:   parseFloat(document.getElementById('hTotal').value)   ||1020,
+        filiereY: parseFloat(document.getElementById('filiereY').value) ||100,
+        // filiereH, mcH, fil2H sont déduits de la face visible des sections (Step 2)
+        bpW:      parseFloat(document.getElementById('bpW').value)      ||100,
+        bpH:      parseFloat(document.getElementById('bpH').value)      ||8,
+        fil2:     document.getElementById('fil2Check').checked,
+        fil2Dist: parseFloat(document.getElementById('fil2Dist').value) ||100,
+        dm2:      parseFloat(document.getElementById('dm2').value)      || null,
+        db2:      parseFloat(document.getElementById('db2').value)      || null,
+        filiereW: parseFloat(document.getElementById('filiereW').value) || 40,
+        filiereH2:parseFloat(document.getElementById('filiereH2').value)|| null,
+        mcW:      parseFloat(document.getElementById('mcW').value)      || 40,
+        mcH2:     parseFloat(document.getElementById('mcH2').value)     || null,
+        fil2W:    parseFloat(document.getElementById('fil2W').value)    || 40,
+        fil2H2:   parseFloat(document.getElementById('fil2H2').value)   || null,
+        vpi,emont,nbBar,nbTot,ebarr,vide,ni,conf,diagramUrl:null
+    };
+    // Déduire filiereH, mcH, fil2H depuis la face visible des sections
+    lastResult.filiereH = lastResult.filiereW;                // face vis. filière basse = sa hauteur
+    lastResult.mcH      = lastResult.mcW;                     // face vis. MC = son épaisseur
+    lastResult.fil2H    = lastResult.fil2W;
+
+    afficherResultats(lastResult);
+    document.getElementById('resPlaceholder').style.display='none';
+    document.getElementById('resultsBox').style.display='flex';
+    document.getElementById('adjPanel').style.display='block';
+    document.getElementById('adjDisp').textContent=lt.toFixed(0)+' mm';
+    document.getElementById('adjBarrPanel').style.display='block';
+    document.getElementById('adjBarrDisp').textContent=nbBar+' / int.';
+
+    dessiner(lastResult);
+    lastDiagUrl=document.getElementById('diagCanvas').toDataURL('image/png');
+    lastResult.diagramUrl=lastDiagUrl;
+
+    afficherDebitage(lastResult);
+
+    // Premier calcul → sauvegarder automatiquement en position 1
+    if (currentEditId === null) {
+        const id = Date.now();
+        positions.push({id, ...lastResult});
+        currentEditId = id;
+        renderTable();
+    } else {
+        // Mise à jour silencieuse si position déjà sauvegardée
+        const idx = positions.findIndex(p=>p.id===currentEditId);
+        if (idx>=0) { positions[idx]={id:currentEditId,...lastResult}; renderTable(); }
+    }
+}
+
+/* ── LISTE DE DÉBITAGE ── */
+function genererDebitage(r) {
+    const MC_H  = r.mcH      ?? 10;
+    const H_TOT = r.hTotal   ?? 1020;
+    const H     = H_TOT - MC_H;
+    const FIL_H = r.filiereH ?? 10;
+    const FIL_Y_TOP = r.filiereY ?? 100;
+    const BP_H  = r.bpH      ?? 8;
+    const BP_W  = r.bpW      ?? 100;
+    const FIL2  = !!r.fil2;
+    const FIL2_H = r.fil2H    ?? 10;
+    const FIL2_D = r.fil2Dist ?? 100;
+    const FIL2_TOP = H - FIL2_D;
+    const FIL2_Y   = FIL2_TOP - FIL2_H;
+    const BAR_Y  = FIL_Y_TOP;
+    const BAR_TOP = FIL2 ? FIL2_Y : H;
+    const BAR_H   = BAR_TOP - BAR_Y;
+
+    const ni = r.nm - 1;   // nb intervalles
+
+    // Montant : longueur fût = H - BP_H (commence au dessus de la plaque)
+    const montantL = H - BP_H;
+
+    const items = [
+        {
+            rep:  'MONTANT',
+            sec:  secStr(r.dm, r.dm2),
+            l:    +montantL.toFixed(1),
+            qte:  r.nm,
+        },
+        {
+            rep:  'PLAQUE BASE',
+            sec:  `${BP_W}×${BP_H}`,
+            l:    BP_W,
+            qte:  r.nm,
+            note: 'plat'
+        },
+        {
+            rep:  'BARREAU',
+            sec:  secStr(r.db, r.db2),
+            l:    +BAR_H.toFixed(1),
+            qte:  r.nbTot,
+        },
+        {
+            rep:  'FILIÈRE BASSE',
+            sec:  secStr(r.filiereW, r.filiereH2 || FIL_H),
+            l:    +r.vpi.toFixed(1),
+            qte:  ni,
+        },
+        ...(FIL2 ? [{
+            rep:  'FILIÈRE HAUTE',
+            sec:  secStr(r.fil2W, r.fil2H2 || FIL2_H),
+            l:    +r.vpi.toFixed(1),
+            qte:  ni,
+        }] : []),
+        {
+            rep:  'MAIN COURANTE',
+            sec:  secStr(r.mcW, r.mcH2 || MC_H),
+            l:    +r.lt.toFixed(1),
+            qte:  1,
+        },
+    ];
+
+    return items;
+}
+
+function afficherDebitage(r) {
+    const items = genererDebitage(r);
+    const box   = document.getElementById('debitageBox');
+    const cont  = document.getElementById('debitageContent');
+
+    let totalPieces = 0, totalL = 0;
+    let rows = items.map(it => {
+        const lt = +(it.l * it.qte).toFixed(1);
+        totalPieces += it.qte;
+        if (!it.note) totalL += lt;
+        const note = it.note ? `<span style="color:var(--muted);font-size:.75em"> (${it.note})</span>` : '';
+        return `<tr>
+            <td class="deb-rep">${it.rep}${note}</td>
+            <td style="color:var(--text)">${it.sec} mm</td>
+            <td style="color:var(--accent2)">${it.l.toFixed(1)}</td>
+            <td style="color:var(--accent2)">${it.qte}</td>
+            <td class="deb-total">${lt.toFixed(1)} mm</td>
+        </tr>`;
+    }).join('');
+
+    cont.innerHTML = `
+        <table class="deb-table">
+            <thead><tr>
+                <th>Repère</th>
+                <th>Section (face vis.×prof.)</th>
+                <th>L (mm)</th><th>Qté</th><th>L. totale</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+        <div class="deb-footer">
+            Total pièces : <span>${totalPieces}</span>
+            &nbsp;&nbsp; Longueur profilés : <span>${totalL.toFixed(1)} mm</span>
+        </div>`;
+
+    box.style.display = 'block';
+}
+
+function afficherResultats(r) {
+    document.getElementById('rVM') .textContent=r.vpi.toFixed(1)+' mm';
+    document.getElementById('rEM') .textContent=r.emont.toFixed(1)+' mm';
+    document.getElementById('rNBI').textContent=r.nbBar+' / intervalle';
+    document.getElementById('rNBT').textContent=r.nbTot+' barreaux';
+    document.getElementById('rEB') .textContent=r.ebarr>0?r.ebarr.toFixed(1)+' mm':'—';
+    const rVBel=document.getElementById('rVB');
+    rVBel.textContent=r.vide.toFixed(1)+' mm';
+    rVBel.className='rv'+(r.conf?'':' rv-danger');
+    const rrow=document.getElementById('rrowVB');
+    rrow.className='rrow '+(r.conf?'hl':'hl-red');
+    const sm=document.getElementById('statusMsg');
+    if (r.conf) sm.innerHTML=`<div class="st-ok">✔ Conforme — ${r.vide.toFixed(1)} mm ≤ ${VIDE_MAX} mm (${(r.vide/VIDE_MAX*100).toFixed(1)}% du max)</div>`;
+    else        sm.innerHTML=`<div class="st-nok">✖ Non conforme — ${r.vide.toFixed(1)} mm > ${VIDE_MAX} mm</div>`;
+}
+
+function autoRecalc() { if (lastResult!==null) calculer(); }
+
+function ajusterBarreaux(delta) {
+    if (!lastResult) return;
+    const nbBar=Math.max(0,lastResult.nbBar+delta);
+    const vide=nbBar===0?lastResult.vpi:(lastResult.vpi-nbBar*lastResult.db)/(nbBar+1);
+    if (vide<0) return;
+    const nbTot=nbBar*lastResult.ni, ebarr=nbBar>0?lastResult.db+vide:0, conf=vide<=VIDE_MAX;
+    lastResult={...lastResult,nbBar,nbTot,ebarr,vide,conf};
+    afficherResultats(lastResult);
+    document.getElementById('adjBarrDisp').textContent=nbBar+' / int.';
+    dessiner(lastResult);
+    lastDiagUrl=document.getElementById('diagCanvas').toDataURL('image/png');
+    lastResult.diagramUrl=lastDiagUrl;
+    if (currentEditId!==null) {
+        const idx=positions.findIndex(p=>p.id===currentEditId);
+        if (idx>=0){positions[idx]={id:currentEditId,...lastResult};renderTable();}
+    }
+}
+
+function ajusterLongueur(delta) {
+    const inp=document.getElementById('longueurTotale');
+    inp.value=Math.max(0,(parseFloat(inp.value)||0)+delta);
+    calculer();
+    if (currentEditId!==null&&lastResult) {
+        lastResult.diagramUrl=lastDiagUrl;
+        const idx=positions.findIndex(p=>p.id===currentEditId);
+        if (idx>=0){positions[idx]={id:currentEditId,...lastResult};renderTable();}
+    }
+}
+
+/* ── DIAGRAMME ── */
+function dessiner(r) { dessinerSurCanvas(document.getElementById('diagCanvas'),r); }
+
+function captureOffscreen(r) {
+    const cv=document.createElement('canvas');
+    dessinerSurCanvas(cv,r);
+    return cv.toDataURL('image/png');
+}
+
+function dessinerSurCanvas(cv, r) {
+    const ctx=cv.getContext('2d');
+    const IW=900, IH=310;
+    cv.width=IW; cv.height=IH;
+    // Dark background
+    ctx.fillStyle='#1c2128';
+    ctx.fillRect(0,0,IW,IH);
+
+    const margin=40, drawW=IW-2*margin, barH=68, yTop=52, yBot=yTop+barH;
+    const scale=drawW/r.lt;
+
+    const xP1L=margin, xP1R=margin+r.dm*scale, xP1C=(xP1L+xP1R)/2;
+    const xP2L=margin+(r.dm+r.vpi)*scale, xP2R=xP2L+r.dm*scale, xP2C=(xP2L+xP2R)/2;
+    const xEnd=margin+drawW;
+    const xB1L=xP1R+r.vide*scale, xB1R=xB1L+r.db*scale;
+
+    /* Draw */
+    let x=margin;
+    for (let i=0;i<r.nm;i++) {
+        const mw=r.dm*scale;
+        // Post glow
+        ctx.fillStyle='rgba(167,139,250,.15)';
+        ctx.fillRect(x-1,yTop-1,mw+2,barH+2);
+        ctx.fillStyle='#a78bfa';
+        ctx.fillRect(x,yTop,mw,barH);
+        ctx.strokeStyle='#c4b5fd'; ctx.lineWidth=1;
+        ctx.strokeRect(x,yTop,mw,barH);
+        if (i<r.nm-1) {
+            x+=mw; x+=r.vide*scale;
+            for (let j=0;j<r.nbBar;j++) {
+                ctx.fillStyle='rgba(45,212,191,.15)';
+                ctx.fillRect(x-1,yTop-1,r.db*scale+2,barH+2);
+                ctx.fillStyle='#2dd4bf';
+                ctx.fillRect(x,yTop,r.db*scale,barH);
+                ctx.strokeStyle='#5eead4'; ctx.lineWidth=1;
+                ctx.strokeRect(x,yTop,r.db*scale,barH);
+                x+=r.db*scale+r.vide*scale;
+            }
+        } else { x+=mw; }
+    }
+
+    /* Cote helper */
+    function cote(x1,x2,y,label,col) {
+        if (x2-x1<4) return;
+        ctx.save();
+        ctx.strokeStyle=col||'#7d8590'; ctx.fillStyle=col||'#7d8590';
+        ctx.lineWidth=1; ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+        [x1,x2].forEach(xi=>{ctx.beginPath();ctx.moveTo(xi,y-5);ctx.lineTo(xi,y+5);ctx.stroke();});
+        const aw=Math.min(7,(x2-x1)/3);
+        ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x1+aw,y-3); ctx.lineTo(x1+aw,y+3); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x2,y); ctx.lineTo(x2-aw,y-3); ctx.lineTo(x2-aw,y+3); ctx.closePath(); ctx.fill();
+        ctx.font='bold 10px Consolas,monospace';
+        const tw=ctx.measureText(label).width, mx=(x1+x2)/2;
+        ctx.fillStyle='#1c2128'; ctx.fillRect(mx-tw/2-3,y-15,tw+6,13);
+        ctx.fillStyle=col||'#7d8590'; ctx.textAlign='center'; ctx.fillText(label,mx,y-4);
+        ctx.restore();
+    }
+    function vref(x,y1,y2,col) {
+        ctx.save(); ctx.strokeStyle=col||'rgba(255,255,255,.1)';
+        ctx.lineWidth=0.7; ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+        ctx.restore();
+    }
+
+    const yC1=yBot+18, yC2=yBot+36, yC3=yBot+56, yC4=yBot+76, yC5=yBot+96;
+
+    cote(margin,xEnd,yTop-18,`L = ${r.lt.toFixed(0)} mm`,'#e6edf3');
+
+    vref(xP1C,yBot,yC1+6,'#a78bfa'); vref(xP2C,yBot,yC1+6,'#a78bfa');
+    vref(xP1R,yBot,yC2+6,'rgba(167,139,250,.5)'); vref(xP2L,yBot,yC2+6,'rgba(167,139,250,.5)');
+
+    cote(xP1C,xP2C,yC1,`Entraxe mont. = ${r.emont.toFixed(2)} mm`,'#a78bfa');
+    cote(xP1R,xP2L,yC2,`Vide/mont. = ${r.vpi.toFixed(2)} mm`,'#818cf8');
+
+    const videCol = r.conf ? '#2dd4bf' : '#f87171';
+    if (r.nbBar>0) {
+        vref(xP1R,yBot,yC3+6,videCol); vref(xB1L,yBot,yC3+6,videCol);
+        vref(xB1R,yBot,yC4+6,'rgba(45,212,191,.4)');
+        vref(xP1L,yBot,yC5+6,'rgba(167,139,250,.4)'); vref(xP1R,yBot,yC5+6,'rgba(167,139,250,.4)');
+        cote(xP1R,xB1L,yC3,`Vide = ${r.vide.toFixed(2)} mm`,videCol);
+        cote(xB1L,xB1R,yC4,`∅ barr. = ${r.db} mm`,'#2dd4bf');
+        cote(xP1L,xP1R,yC5,`∅ mont. = ${r.dm} mm`,'#a78bfa');
+    } else {
+        vref(xP1R,yBot,yC3+6,videCol); vref(xP2L,yBot,yC3+6,videCol);
+        vref(xP1L,yBot,yC4+6,'rgba(167,139,250,.4)'); vref(xP1R,yBot,yC4+6,'rgba(167,139,250,.4)');
+        cote(xP1R,xP2L,yC3,`Vide = ${r.vide.toFixed(2)} mm`,videCol);
+        cote(xP1L,xP1R,yC4,`∅ mont. = ${r.dm} mm`,'#a78bfa');
+    }
+
+    /* Labels */
+    ctx.save(); ctx.font='bold 10px Arial'; ctx.textAlign='center'; ctx.fillStyle='rgba(0,0,0,.6)';
+    if (xP1R-xP1L>22) ctx.fillText('M',xP1C,yTop+barH/2+4);
+    if (r.nbBar>0&&xB1R-xB1L>14) ctx.fillText('B',(xB1L+xB1R)/2,yTop+barH/2+4);
+    ctx.restore();
+
+    /* Legend */
+    const yLeg=IH-10;
+    ctx.font='10px Arial'; ctx.textAlign='left';
+    ctx.fillStyle='#a78bfa'; ctx.fillRect(margin,yLeg-10,10,10);
+    ctx.fillStyle='#7d8590'; ctx.fillText('Montants',margin+13,yLeg);
+    ctx.fillStyle='#2dd4bf'; ctx.fillRect(margin+90,yLeg-10,10,10);
+    ctx.fillStyle='#7d8590'; ctx.fillText('Barreaux',margin+103,yLeg);
+    ctx.textAlign='right'; ctx.fillStyle='rgba(255,255,255,.2)';
+    ctx.fillText("barreaux d'extrémité = virtuels",IW-margin,yLeg);
+}
+
+/* ── GESTION POSITIONS ── */
+function nouvellePosition() {
+    currentEditId=null;
+    document.getElementById('formTitle').textContent='NOUVELLE POSITION';
+    clearForm(false);
+    document.getElementById('posRef').focus();
+}
+
+function clearForm(clearChantier) {
+    if (clearChantier) document.getElementById('nomChantier').value='';
+    ['posRef','longueurTotale','nombreMontants','dimensionMontant','dimensionBarreau',
+     'videMaco','retraitG','retraitD'].forEach(id=>document.getElementById(id).value='');
+    // Reset filière/MC to defaults
+    document.getElementById('hTotal').value   = '1020';
+    document.getElementById('filiereY').value = '100';
+    document.getElementById('mcW').value      = '40';
+    document.getElementById('bpW').value      = '100';
+    document.getElementById('bpH').value      = '8';
+    document.getElementById('fil2Check').checked = true;
+    document.getElementById('fil2Body').classList.add('open');
+    document.getElementById('fil2WRow').style.display = 'block';
+    document.getElementById('fil2Dist').value = '100';
+    // Reset manual override flags on fil2 section fields
+    const f2W = document.getElementById('fil2W');
+    f2W.value = '10'; delete f2W.dataset.manual;
+    f2H2.value = '40'; delete f2H2.dataset.manual;
+    document.getElementById('dm2').value       = '40';
+    document.getElementById('db2').value       = '30';
+    document.getElementById('filiereW').value  = '10';
+    document.getElementById('filiereH2').value = '40';
+    document.getElementById('mcW').value       = '10';
+    document.getElementById('mcH2').value      = '50';
+    document.getElementById('fil2W').value     = '10';
+    document.getElementById('fil2H2').value    = '40';
+    document.getElementById('debitageBox').style.display = 'none';
+    Object.values(SEC_MAP).forEach(m => {
+        const el = document.getElementById(m.prev);
+        if (el) el.textContent = '—';
+    });
+    document.getElementById('macoResult').style.display='none';
+    document.getElementById('macoBody').classList.remove('open');
+    document.getElementById('macoArrow').classList.remove('open');
+    document.getElementById('resultsBox').style.display='none';
+    document.getElementById('resPlaceholder').style.display='flex';
+    document.getElementById('adjPanel').style.display='none';
+    document.getElementById('adjBarrPanel').style.display='none';
+    document.getElementById('statusMsg').innerHTML='';
+    lastResult=null; lastDiagUrl=null;
+}
+
+function sauvegarderPosition() {
+    if (!lastResult){alert('Effectuez d\'abord un calcul.');return;}
+    lastResult.ref=document.getElementById('posRef').value.trim()||lastResult.ref;
+    lastResult.chantier=document.getElementById('nomChantier').value.trim();
+    lastResult.diagramUrl=lastDiagUrl;
+    if (currentEditId!==null) {
+        const idx=positions.findIndex(p=>p.id===currentEditId);
+        if (idx>=0) positions[idx]={id:currentEditId,...lastResult};
+    } else {
+        const id=Date.now(); positions.push({id,...lastResult}); currentEditId=id;
+    }
+    renderTable();
+    clearForm(false); currentEditId=null;
+    document.getElementById('formTitle').textContent='NOUVELLE POSITION';
+    // Flash chantier border
+    const inp=document.getElementById('nomChantier');
+    inp.style.borderColor='var(--green)';
+    setTimeout(()=>inp.style.borderColor='',1500);
+}
+
+function editerPosition(id) {
+    const pos=positions.find(p=>p.id===id); if (!pos) return;
+    currentEditId=id;
+    document.getElementById('formTitle').textContent='MODIFIER: '+pos.ref.toUpperCase();
+    document.getElementById('posRef').value=pos.ref;
+    if (pos.chantier) document.getElementById('nomChantier').value=pos.chantier;
+    document.getElementById('longueurTotale').value=pos.lt;
+    document.getElementById('nombreMontants').value=pos.nm;
+    document.getElementById('dimensionMontant').value=pos.dm;
+    document.getElementById('dimensionBarreau').value=pos.db;
+    document.getElementById('hTotal').value   = pos.hTotal   ?? 1020;
+    document.getElementById('filiereY').value = pos.filiereY ?? 100;
+    document.getElementById('bpW').value      = pos.bpW      ?? 100;
+    document.getElementById('bpH').value      = pos.bpH      ?? 8;
+    const f2 = !!pos.fil2;
+    document.getElementById('fil2Check').checked = f2;
+    document.getElementById('fil2Body').classList.toggle('open', f2);
+    document.getElementById('fil2WRow').style.display = f2 ? 'block' : 'none';
+    document.getElementById('fil2Dist').value = pos.fil2Dist ?? 100;
+    document.getElementById('dm2').value      = pos.dm2      ?? pos.dm;
+    document.getElementById('db2').value      = pos.db2      ?? pos.db;
+    document.getElementById('filiereW').value  = pos.filiereW  ?? 40;
+    document.getElementById('mcW').value       = pos.mcW       ?? 40;
+    const _f2w = document.getElementById('fil2W');
+    const _f2h2 = document.getElementById('fil2H2');
+    _f2w.value = pos.fil2W ?? 40; if(pos.fil2W) _f2w.dataset.manual='1'; else delete _f2w.dataset.manual;
+    _f2h2.value = pos.fil2H2 ?? ''; if(pos.fil2H2) _f2h2.dataset.manual='1'; else delete _f2h2.dataset.manual;
+    if (pos.videMaco) {
+        document.getElementById('videMaco').value=pos.videMaco;
+        document.getElementById('retraitG').value=pos.retraitG||0;
+        document.getElementById('retraitD').value=pos.retraitD||0;
+        document.getElementById('macoBody').classList.add('open');
+        document.getElementById('macoArrow').classList.add('open');
+        calcMaco();
+    } else {
+        document.getElementById('macoBody').classList.remove('open');
+        document.getElementById('macoArrow').classList.remove('open');
+    }
+    document.getElementById('formCard').scrollIntoView({behavior:'smooth'});
+    calculer(); renderTable();
+}
+
+function dupliquerPosition(id) {
+    const src=positions.find(p=>p.id===id); if (!src) return;
+    const newId=Date.now(), newRef=src.ref+' (copie)';
+    const copy={...src,id:newId,ref:newRef,diagramUrl:null};
+    positions.push(copy); renderTable();
+    currentEditId=newId;
+    document.getElementById('formTitle').textContent='MODIFIER: '+newRef.toUpperCase();
+    document.getElementById('posRef').value=newRef;
+    if (src.chantier) document.getElementById('nomChantier').value=src.chantier;
+    document.getElementById('longueurTotale').value=src.lt;
+    document.getElementById('nombreMontants').value=src.nm;
+    document.getElementById('dimensionMontant').value=src.dm;
+    document.getElementById('dimensionBarreau').value=src.db;
+    document.getElementById('hTotal').value   = src.hTotal   ?? 1020;
+    document.getElementById('filiereY').value = src.filiereY ?? 100;
+    document.getElementById('bpW').value      = src.bpW      ?? 100;
+    document.getElementById('bpH').value      = src.bpH      ?? 8;
+    const f2d = !!src.fil2;
+    document.getElementById('fil2Check').checked = f2d;
+    document.getElementById('fil2Body').classList.toggle('open', f2d);
+    document.getElementById('fil2WRow').style.display = f2d ? 'block' : 'none';
+    document.getElementById('fil2Dist').value = src.fil2Dist ?? 100;
+    document.getElementById('dm2').value      = src.dm2      ?? src.dm;
+    document.getElementById('db2').value      = src.db2      ?? src.db;
+    document.getElementById('filiereW').value  = src.filiereW  ?? 40;
+    document.getElementById('mcW').value       = src.mcW       ?? 40;
+    document.getElementById('fil2W').value     = src.fil2W     ?? 40;
+    if (src.videMaco) {
+        document.getElementById('videMaco').value=src.videMaco;
+        document.getElementById('retraitG').value=src.retraitG||0;
+        document.getElementById('retraitD').value=src.retraitD||0;
+        document.getElementById('macoBody').classList.add('open');
+        document.getElementById('macoArrow').classList.add('open');
+        calcMaco();
+    } else {
+        document.getElementById('macoBody').classList.remove('open');
+        document.getElementById('macoArrow').classList.remove('open');
+    }
+    document.getElementById('formCard').scrollIntoView({behavior:'smooth'});
+    updateAllPreviews(); calculer(); renderTable();
+}
+
+function ajusterPositionDirecte(id, delta) {
+    const idx=positions.findIndex(p=>p.id===id); if (idx<0) return;
+    const p=positions[idx];
+    const lt=Math.max(0,p.lt+delta), videTotal=lt-p.nm*p.dm;
+    if (videTotal<=0) return;
+    const ni=p.nm-1, vpi=videTotal/ni;
+    let nbBar=0,vide=0,found=false;
+    if (vpi<=VIDE_MAX){vide=vpi;found=true;}
+    else{for(let n=1;n<=500;n++){const e=(vpi-n*p.db)/(n+1);if(e<=0)break;if(e<=VIDE_MAX){nbBar=n;vide=e;found=true;break;}}}
+    if (!found) return;
+    const nbTot=nbBar*ni, emont=vpi+p.dm, ebarr=nbBar>0?p.db+vide:0, conf=vide<=VIDE_MAX;
+    const updated={...p,lt,vpi,emont,nbBar,nbTot,ebarr,vide,ni,conf};
+    updated.diagramUrl=captureOffscreen(updated);
+    positions[idx]=updated;
+    if (currentEditId===id) {
+        document.getElementById('longueurTotale').value=lt;
+        lastResult=updated; lastDiagUrl=updated.diagramUrl;
+        afficherResultats(updated);
+        dessiner(updated);
+        document.getElementById('adjDisp').textContent=lt.toFixed(0)+' mm';
+        document.getElementById('adjBarrDisp').textContent=nbBar+' / int.';
+    }
+    renderTable();
+}
+
+function supprimerPosition(id) {
+    if (!confirm('Supprimer cette position ?')) return;
+    positions=positions.filter(p=>p.id!==id);
+    if (currentEditId===id) currentEditId=null;
+    renderTable();
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderTable() {
+    const wrap=document.getElementById('posWrap');
+    const ok=positions.filter(p=>p.conf).length;
+    document.getElementById('tblCount').textContent=
+        positions.length ? `${positions.length} position(s) — ${ok} conforme(s) / ${positions.length-ok} non conforme(s)` : '';
+    if (!positions.length) {
+        wrap.innerHTML='<div class="empty"><div class="ico">◈</div>Aucune position enregistrée</div>';
+        return;
+    }
+    let h=`<table>
+        <thead><tr>
+            <th>N°</th><th>Référence</th><th>Longueur</th><th>Vide maco</th>
+            <th>Montants</th><th>Entraxe mont.</th><th>Barreaux tot.</th>
+            <th>Vide barr.</th><th>Statut</th><th>Actions</th>
+        </tr></thead><tbody>`;
+    positions.forEach((p,i)=>{
+        const ar=p.id===currentEditId?'active-row':'';
+        const bdg=p.conf
+            ?'<span class="badge badge-ok">Conforme</span>'
+            :'<span class="badge badge-nok">Non conf.</span>';
+        const vm=p.videMaco?p.videMaco.toFixed(0)+' mm':'—';
+        const vbStyle=p.conf?'':'color:var(--red);font-weight:700';
+        h+=`<tr class="${ar}">
+            <td class="mono" style="color:var(--muted)">${i+1}</td>
+            <td><strong>${escHtml(p.ref)}</strong></td>
+            <td>
+                <div class="tbl-adj">
+                    <button class="tadj" onclick="ajusterPositionDirecte(${p.id},-10)">−10</button>
+                    <button class="tadj" onclick="ajusterPositionDirecte(${p.id},-1)">−1</button>
+                    <span class="tadj-val">${p.lt.toFixed(0)}</span>
+                    <button class="tadj" onclick="ajusterPositionDirecte(${p.id},+1)">+1</button>
+                    <button class="tadj" onclick="ajusterPositionDirecte(${p.id},+10)">+10</button>
+                </div>
+            </td>
+            <td class="mono">${vm}</td>
+            <td class="mono">${p.nm} × e:${p.dm}</td>
+            <td class="mono">${p.emont.toFixed(2)} mm</td>
+            <td class="mono">${p.nbTot} × ∅${p.db}</td>
+            <td class="mono" style="${vbStyle}">${p.vide.toFixed(2)} mm</td>
+            <td>${bdg}</td>
+            <td style="white-space:nowrap">
+                <button class="btn btn-ghost btn-sm" onclick="editerPosition(${p.id})" title="Éditer">✏</button>
+                <button class="btn btn-ghost btn-sm" onclick="dupliquerPosition(${p.id})" title="Dupliquer">⧉</button>
+                <button class="btn btn-ghost btn-sm" onclick="exporterDXFid(${p.id})" title="Exporter DXF">⬡</button>
+                <button class="btn btn-ghost btn-sm" onclick="imprimerFicheId(${p.id})" title="Imprimer">⎙</button>
+                <button class="btn btn-red btn-sm" onclick="supprimerPosition(${p.id})" title="Supprimer">✕</button>
+            </td>
+        </tr>`;
+    });
+    wrap.innerHTML=h+'</tbody></table>';
+}
+
+/* ── EXCEL ── */
+function exporterExcel() {
+    if (!positions.length){alert('Aucune position à exporter.');return;}
+    const data = positions.map((p,i) => ({
+        // Identification
+        'N°':              i+1,
+        'Chantier':        p.chantier || '',
+        'Référence':       p.ref,
+        // Dimensions barreaudage
+        'Longueur (mm)':          p.lt,
+        'Vide maçonnerie (mm)':   p.videMaco  ?? '',
+        'Retrait gauche (mm)':    p.retraitG  ?? '',
+        'Retrait droit (mm)':     p.retraitD  ?? '',
+        'Nb montants':            p.nm,
+        'Dim. montant (mm)':      p.dm,
+        'Dim. barreau (mm)':      p.db,
+        // Résultats calculés
+        'Vide/montants (mm)':     +p.vpi.toFixed(2),
+        'Entraxe montant (mm)':   +p.emont.toFixed(2),
+        'Barreaux/intervalle':    p.nbBar,
+        'Barreaux total':         p.nbTot,
+        'Entraxe barreau (mm)':   +p.ebarr.toFixed(2),
+        'Vide barreaux (mm)':     +p.vide.toFixed(2),
+        'Conforme':               p.conf ? 'OUI' : 'NON',
+        // Dimensionnement vertical
+        'Hauteur totale/dessus MC (mm)': p.hTotal   ?? 1020,
+        'Main courante ép. (mm)':        p.mcH      ?? 10,
+        // Filière basse
+        'Filière basse dessus/sol (mm)': p.filiereY ?? 100,
+        'Filière basse haut. (mm)':      p.filiereH ?? 10,
+        // Filière haute
+        'Filière haute':                 p.fil2 ? 1 : 0,
+        'Filière haute haut. (mm)':      p.fil2 ? (p.fil2H    ?? 10)  : '',
+        'Filière haute dist./MC (mm)':   p.fil2 ? (p.fil2Dist ?? 100) : '',
+        // Plaque de base
+        'Plaque base largeur (mm)':  p.bpW ?? 100,
+        'Plaque base ép. (mm)':      p.bpH ?? 8,
+        // Sections profilés (face visible × profondeur)
+        'Section montant face vis. (mm)':  p.dm,
+        'Section montant prof. (mm)':      p.dm2      ?? '',
+        'Section barreau face vis. (mm)':  p.db,
+        'Section barreau prof. (mm)':      p.db2      ?? '',
+        'Section fil.basse face vis. (mm)':p.filiereW ?? 40,
+        'Section fil.basse prof. (mm)':    p.filiereH2?? '',
+        'Section MC face vis. (mm)':       p.mcW      ?? 40,
+        'Section MC prof. (mm)':           p.mcH2     ?? '',
+        'Section fil.haute face vis. (mm)':p.fil2 ? (p.fil2W  ?? 40) : '',
+        'Section fil.haute prof. (mm)':    p.fil2 ? (p.fil2H2 ?? '') : '',
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws['!cols'] = [4,20,22, 14,16,14,14, 10,14,14, 16,16,14,12,16,16,10,
+                   18,12, 18,14, 10,14,16, 16,10].map(w=>({wch:w}));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Garde-corps');
+    XLSX.writeFile(wb, `barreaudage_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+function importerExcel(inp) {
+    const file=inp.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+        try {
+            const wb=XLSX.read(e.target.result,{type:'binary'});
+            const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            let count=0;
+            rows.forEach(row=>{
+                const lt=parseFloat(row['Longueur (mm)']),nm=parseInt(row['Nb montants']),
+                      dm=parseFloat(row['Dim. montant (mm)']),db=parseFloat(row['Dim. barreau (mm)']);
+                if([lt,nm,dm,db].some(isNaN)||nm<2)return;
+                const videTotal=lt-nm*dm;if(videTotal<=0)return;
+                const ni=nm-1,vpi=videTotal/ni;
+                let nbBar=0,vide=0,found=false;
+                if(vpi<=VIDE_MAX){vide=vpi;found=true;}
+                else{for(let n=1;n<=500;n++){const ev=(vpi-n*db)/(n+1);if(ev<=0)break;if(ev<=VIDE_MAX){nbBar=n;vide=ev;found=true;break;}}}
+                if(!found)return;
+                positions.push({
+                    id:       Date.now()+count,
+                    chantier: row['Chantier']    || '',
+                    ref:      row['Référence']   || ('Import-'+(count+1)),
+                    lt, nm, dm, db,
+                    videMaco: parseFloat(row['Vide maçonnerie (mm)'])  || null,
+                    retraitG: parseFloat(row['Retrait gauche (mm)'])   || null,
+                    retraitD: parseFloat(row['Retrait droit (mm)'])    || null,
+                    hTotal:   parseFloat(row['Hauteur totale/dessus MC (mm)'])  || 1020,
+                    filiereY: parseFloat(row['Filière basse dessus/sol (mm)'])  || 100,
+                    filiereH: parseFloat(row['Filière basse haut. (mm)'])       || 10,
+                    mcH:      parseFloat(row['Main courante ép. (mm)'])         || 10,
+                    bpW:      parseFloat(row['Plaque base largeur (mm)'])       || 100,
+                    bpH:      parseFloat(row['Plaque base ép. (mm)'])           || 8,
+                    fil2: !!(parseFloat(row['Filière haute']) || ['OUI','YES','TRUE'].includes(String(row['Filière haute']||'').toUpperCase().trim())),
+                    fil2H:    parseFloat(row['Filière haute haut. (mm)'])       || 10,
+                    fil2Dist: parseFloat(row['Filière haute dist./MC (mm)'])    || 100,
+                    dm2:      parseFloat(row['Section montant prof. (mm)'])        || null,
+                    db2:      parseFloat(row['Section barreau prof. (mm)'])         || null,
+                    filiereW: parseFloat(row['Section fil.basse face vis. (mm)'])   || 40,
+                    filiereH2:parseFloat(row['Section fil.basse prof. (mm)'])       || null,
+                    mcW:      parseFloat(row['Section MC face vis. (mm)'])          || 40,
+                    mcH2:     parseFloat(row['Section MC prof. (mm)'])              || null,
+                    fil2W:    parseFloat(row['Section fil.haute face vis. (mm)'])   || 40,
+                    fil2H2:   parseFloat(row['Section fil.haute prof. (mm)'])       || null,
+                    vpi, emont: vpi+dm, nbBar, nbTot: nbBar*ni,
+                    ebarr: nbBar>0 ? db+vide : 0,
+                    vide, ni, conf: vide<=VIDE_MAX, diagramUrl: null
+                });count++;
+            });
+            renderTable();
+            alert(`${count} position(s) importée(s).`);
+            // Ouvrir la première position importée directement
+            if (count > 0) {
+                const firstId = positions[positions.length - count].id;
+                editerPosition(firstId);
+            }
+        } catch(err){alert('Erreur import : '+err.message);}
+    };
+    reader.readAsBinaryString(file);inp.value='';
+}
+
+/* ── IMPRESSION ── */
+const PRINT_CSS=`
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Arial,sans-serif;padding:18px 22px;color:#222;}
+.pf-header{display:flex;justify-content:space-between;align-items:flex-start;
+    padding-bottom:10px;border-bottom:3px solid #2dd4bf;margin-bottom:14px;}
+.pf-header h2{color:#1a1a2e;font-size:1.2em;margin-bottom:3px;}
+.pf-chantier{color:#555;font-size:.88em;margin-top:2px;}
+.pf-ref{color:#2dd4bf;font-size:1em;font-weight:700;margin-top:2px;}
+.pf-meta{text-align:right;font-size:.8em;color:#666;line-height:1.7;}
+.pf-status-ok{background:#d1fae5;color:#065f46;padding:8px 14px;border-radius:7px;
+    text-align:center;font-weight:700;margin-bottom:12px;font-size:.88em;}
+.pf-status-nok{background:#fee2e2;color:#991b1b;padding:8px 14px;border-radius:7px;
+    text-align:center;font-weight:700;margin-bottom:12px;font-size:.88em;}
+.pf-diag{width:100%;border:1px solid #ddd;border-radius:6px;margin-bottom:14px;display:block;}
+.pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.pf-box{border:1px solid #ddd;border-radius:7px;padding:11px;}
+.pf-box h4{font-size:.75em;text-transform:uppercase;letter-spacing:.5px;color:#2dd4bf;
+    margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:5px;}
+.pf-row{display:flex;justify-content:space-between;font-size:.83em;padding:3px 0;border-bottom:1px solid #f5f5f5;}
+.pfl{color:#666;}.pfv{font-weight:700;color:#111;font-family:Consolas,monospace;}
+.pf-sign{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.pf-sign-box{border:1px solid #ddd;border-radius:7px;padding:9px 12px;min-height:52px;}
+.pf-sign-label{font-size:.72em;color:#999;margin-bottom:5px;}
+.pf-note{font-size:.7em;color:#bbb;text-align:right;margin-top:8px;font-family:monospace;}
+.pf-sum-table{width:100%;border-collapse:collapse;font-size:.8em;margin-top:10px;}
+.pf-sum-table th{background:#1a1a2e;color:white;padding:7px 9px;text-align:left;}
+.pf-sum-table td{padding:6px 9px;border-bottom:1px solid #eee;font-family:Consolas,monospace;}
+.pf-sum-table tr:nth-child(even) td{background:#f8f9fa;}
+@media print{body{padding:10px 14px;}}
+`;
+
+function buildFiche(pos) {
+    const date=new Date().toLocaleDateString('fr-CH');
+    const chStr=pos.chantier?`<div class="pf-chantier">🏗 Chantier : <strong>${escHtml(pos.chantier)}</strong></div>`:'';
+    const macoHtml=pos.videMaco?`
+        <div class="pf-row"><span class="pfl">Vide maçonnerie</span><span class="pfv">${pos.videMaco.toFixed(0)} mm</span></div>
+        <div class="pf-row"><span class="pfl">Retrait G / D</span><span class="pfv">${pos.retraitG||0} / ${pos.retraitD||0} mm</span></div>`:'';
+    const stCls=pos.conf?'pf-status-ok':'pf-status-nok';
+    const stTxt=pos.conf
+        ?`✔ CONFORME — Vide ${pos.vide.toFixed(2)} mm ≤ ${VIDE_MAX} mm`
+        :`✖ NON CONFORME — Vide ${pos.vide.toFixed(2)} mm > ${VIDE_MAX} mm`;
+    const diagHtml=pos.diagramUrl
+        ?`<img class="pf-diag" src="${pos.diagramUrl}">`
+        :'<div style="padding:10px;text-align:center;color:#bbb;border:1px dashed #ddd;border-radius:6px;margin-bottom:12px;font-size:.8em">Schéma non disponible — recalculer la position</div>';
+    return `<div class="pf">
+        <div class="pf-header">
+            <div><h2>⊞ Fiche de Barreaudage</h2>${chStr}<div class="pf-ref">${escHtml(pos.ref)}</div></div>
+            <div class="pf-meta"><div>Date : ${date}</div><div>Vide max : ${VIDE_MAX} mm</div></div>
+        </div>
+        <div class="${stCls}">${stTxt}</div>
+        ${diagHtml}
+        <div class="pf-grid">
+            <div class="pf-box"><h4>Paramètres</h4>
+                ${macoHtml}
+                <div class="pf-row"><span class="pfl">Longueur barrière</span><span class="pfv">${pos.lt.toFixed(0)} mm</span></div>
+                <div class="pf-row"><span class="pfl">Nombre de montants</span><span class="pfv">${pos.nm}</span></div>
+                <div class="pf-row"><span class="pfl">Dimension montant</span><span class="pfv">${pos.dm} mm</span></div>
+                <div class="pf-row"><span class="pfl">Dimension barreau</span><span class="pfv">${pos.db} mm</span></div>
+            </div>
+            <div class="pf-box"><h4>Résultats</h4>
+                <div class="pf-row"><span class="pfl">Vide entre montants</span><span class="pfv">${pos.vpi.toFixed(2)} mm</span></div>
+                <div class="pf-row"><span class="pfl">Entraxe montant</span><span class="pfv">${pos.emont.toFixed(2)} mm</span></div>
+                <div class="pf-row"><span class="pfl">Barreaux / intervalle</span><span class="pfv">${pos.nbBar}</span></div>
+                <div class="pf-row"><span class="pfl">Barreaux total</span><span class="pfv">${pos.nbTot}</span></div>
+                <div class="pf-row"><span class="pfl">Entraxe barreau</span><span class="pfv">${pos.ebarr>0?pos.ebarr.toFixed(2)+' mm':'—'}</span></div>
+                <div class="pf-row" style="border-top:2px solid #2dd4bf;margin-top:5px;padding-top:5px;">
+                    <span class="pfl"><strong>Vide entre barreaux</strong></span>
+                    <span class="pfv" style="font-size:1.15em;color:${pos.conf?'#065f46':'#991b1b'}">${pos.vide.toFixed(2)} mm</span>
+                </div>
+            </div>
+        </div>
+        <div class="pf-sign">
+            <div class="pf-sign-box"><div class="pf-sign-label">Établi par</div></div>
+            <div class="pf-sign-box"><div class="pf-sign-label">Visé / Date</div></div>
+        </div>
+        <div class="pf-note">BARREAUDAGE CALC — Dominique Rossier</div>
+    </div>`;
+}
+
+function ouvrirFenetrePrint(htmlBody) {
+    const w=window.open('','_blank','width=860,height=700');
+    if (!w){alert('Popup bloquée.');return;}
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fiche</title><style>${PRINT_CSS}</style></head><body>${htmlBody}</body></html>`);
+    w.document.close();
+    const imgs=w.document.images;
+    if (imgs.length===0){w.focus();w.print();}
+    else {
+        let loaded=0;
+        const tryPrint=()=>{if(++loaded>=imgs.length){w.focus();w.print();}};
+        Array.from(imgs).forEach(img=>{if(img.complete)tryPrint();else{img.onload=tryPrint;img.onerror=tryPrint;}});
+    }
+}
+
+function imprimerFicheActive() {
+    if (!lastResult){alert('Aucun résultat à imprimer.');return;}
+    const pos=currentEditId!==null?(positions.find(p=>p.id===currentEditId)||lastResult):lastResult;
+    if (!pos.diagramUrl&&lastDiagUrl) pos.diagramUrl=lastDiagUrl;
+    ouvrirFenetrePrint(buildFiche(pos));
+}
+function imprimerFicheId(id) {
+    const pos=positions.find(p=>p.id===id);if(!pos)return;
+    ouvrirFenetrePrint(buildFiche(pos));
+}
+/* ── DXF EXPORT ─────────────────────────────────────────────────
+   Police : ISOCPEUR (style DXF ISOC → isocpeur.shx)
+   Texte  : hauteur standard 10 mm
+   Vues   : élévation + vue de dessus alignée sur l'axe
+   Cotes  : standard AutoCAD (dimension lines manuelles)
+   Blocs  : MONTANT / BARREAU / FILIERE / FILIERE2 / MAIN_COURANTE / GC_xxx
+   Calques: MONTANTS / BARREAUX / FILIERE / MAIN_COURANTE / COTES → col 7
+---------------------------------------------------------------- */
+function genererDXF(r) {
+    const MC_H      = r.mcH      ?? 10;
+    const H_TOT     = r.hTotal   ?? 1020;
+    const H         = H_TOT - MC_H;
+    const FIL_H     = r.filiereH ?? 10;
+    const FIL_Y_TOP = r.filiereY ?? 100;
+    const FIL_Y     = FIL_Y_TOP - FIL_H;
+    const BP_W      = r.bpW      ?? 100;
+    const BP_H      = r.bpH      ?? 8;
+    const BAR_Y     = FIL_Y_TOP;
+    const FIL2      = !!r.fil2;
+    const FIL2_H    = r.fil2H    ?? 10;
+    const FIL2_D    = r.fil2Dist ?? 100;
+    const FIL2_TOP  = H - FIL2_D;
+    const FIL2_Y    = FIL2_TOP - FIL2_H;
+    const BAR_TOP   = FIL2 ? FIL2_Y : H;
+    const BAR_H     = BAR_TOP - BAR_Y;
+
+    // Profondeurs (plan) de chaque élément
+    const dMont = parseFloat(r.dm2)       || parseFloat(r.dm)  || 40;
+    const dBarr = parseFloat(r.db2)       || parseFloat(r.db)  || 12;
+    const dFilB = parseFloat(r.filiereH2) || FIL_H;
+    const dMC   = parseFloat(r.mcH2)      || MC_H;
+    const dFil2 = parseFloat(r.fil2H2)    || FIL2_H;
+    const isRound = (a,b) => !b || parseFloat(b)===parseFloat(a);
+
+    // Texte DXF pour section : %%c = symbole Ø dans AutoCAD
+    function secDXF(a,b) {
+        const av=parseFloat(a)||0, bv=parseFloat(b)||0;
+        if (!av) return '';
+        return (!bv || bv===av) ? `%%c${av}` : `${av}x${bv}`;
+    }
+
+    const sep = '\r\n';
+    const f   = v => parseFloat(v).toFixed(4);
+
+    const gcName = ('GC_' + (r.ref||'GC'))
+        .toUpperCase().replace(/[^A-Z0-9_-]/g,'_').substring(0,28);
+
+    /* ── helpers ── */
+    function pline(layer, pts) {
+        const v = ([x,y]) => ['  0','VERTEX','  8',layer,
+            ' 10',f(x),' 20',f(y),' 30','0.0000'].join(sep);
+        return ['  0','POLYLINE','  8',layer,' 62','256',
+            ' 66','1',' 10','0.0000',' 20','0.0000',' 30','0.0000',' 70','1',
+            ...pts.map(v),'  0','SEQEND','  8',layer].join(sep);
+    }
+    function box(x1,y1,x2,y2,lay) {
+        return pline(lay,[[x1,y1],[x2,y1],[x2,y2],[x1,y2]]);
+    }
+    // Texte ISOCPEUR centré horizontalement
+    function txt(x,y,h,str,align) {
+        // align: 0=left, 1=center, 4=middle (not used in R12 center)
+        const a = align ?? 0;
+        const rows = ['  0','TEXT','  8','0',' 62','256',
+            '  7','ISOC',
+            ' 10',f(x),' 20',f(y),' 30','0.0000',
+            ' 40',f(h),'  1',str];
+        if (a===1) { rows.push(' 72','1'); rows.push(' 11',f(x)); rows.push(' 21',f(y)); rows.push(' 31','0.0000'); }
+        return rows.join(sep);
+    }
+    function ins(blk,x,y,sx,sy) {
+        return ['  0','INSERT','  8','0','  2',blk,
+            ' 10',f(x),' 20',f(y),' 30','0.0000',
+            ' 41',f(sx??1),' 42',f(sy??1),' 43','1.0000',' 50','0.0000'].join(sep);
+    }
+    function pad(s,n){ return String(s).padEnd(n).substring(0,n); }
+    function bHdr(name) {
+        return ['  0','BLOCK','  8','0','  2',name,' 70','0',
+            ' 10','0.0000',' 20','0.0000',' 30','0.0000','  3',name,'  1',''].join(sep);
+    }
+    const bEnd = () => '  0\r\nENDBLK';
+    // Ligne simple (pour cotes)
+    /* ═══ BLOCS ═══ */
+    const bpX1 = r.dm/2 - BP_W/2, bpX2 = r.dm/2 + BP_W/2;
+    const blkMontant = [bHdr('MONTANT'),
+        box(bpX1,0,bpX2,BP_H,'MONTANTS'),
+        box(0,BP_H,r.dm,H,'MONTANTS'),
+        bEnd()].join(sep);
+
+    const blkBarreau = [bHdr('BARREAU'),
+        box(0,0,r.db,BAR_H,'BARREAUX'), bEnd()].join(sep);
+
+    const blkFiliere = [bHdr('FILIERE'),
+        box(0,0,1,FIL_H,'FILIERE'), bEnd()].join(sep);
+
+    const blkFiliere2 = FIL2 ? [bHdr('FILIERE2'),
+        box(0,0,1,FIL2_H,'FILIERE2'), bEnd()].join(sep) : null;
+
+    const blkMC = [bHdr('MAIN_COURANTE'),
+        box(0,0,1,MC_H,'MAIN_COURANTE'), bEnd()].join(sep);
+
+    /* ═══ ASSEMBLAGE GC ═══ */
+    let gcE = [];
+    let xg = 0;
+    for (let i=0; i<r.nm; i++) {
+        gcE.push(ins('MONTANT',xg,0));
+        if (i<r.nm-1) {
+            const xL = xg+r.dm;
+            gcE.push(ins('FILIERE',xL,FIL_Y,r.vpi,1));
+            if (FIL2) gcE.push(ins('FILIERE2',xL,FIL2_Y,r.vpi,1));
+            xg += r.dm+r.vide;
+            for (let j=0; j<r.nbBar; j++) {
+                gcE.push(ins('BARREAU',xg,BAR_Y));
+                xg += r.db+r.vide;
+            }
+        } else { xg += r.dm; }
+    }
+    gcE.push(ins('MAIN_COURANTE',0,H,r.lt,1));
+    const blkGC = [bHdr(gcName), gcE.join(sep), bEnd()].join(sep);
+
+    /* ═══ VUE DE DESSUS — BLOCS INDÉPENDANTS ═══ */
+    const planGap = 200;
+    const maxD = Math.max(dMont, dBarr, dFilB, dMC, FIL2?dFil2:0, BP_W);
+    const yPlan = -(planGap + maxD*0.5 + 50);
+
+    // PLAN_MONTANT : plaque + fût, centré sur y=0 (axe)
+    const blkPlanMont = [bHdr('PLAN_MONTANT'),
+        box(r.dm/2-BP_W/2, -BP_W/2,  r.dm/2+BP_W/2, BP_W/2,  'MONTANTS'), // plaque
+        box(0,             -dMont/2,  r.dm,           dMont/2, 'MONTANTS'), // fût
+        bEnd()].join(sep);
+
+    // PLAN_BARREAU : 1 barreau, centré
+    const blkPlanBarr = [bHdr('PLAN_BARREAU'),
+        box(0, -dBarr/2, r.db, dBarr/2, 'BARREAUX'),
+        bEnd()].join(sep);
+
+    // PLAN_FILIERE : 1mm large × dFilB, échelle X=vpi à l'insert
+    const blkPlanFil = [bHdr('PLAN_FILIERE'),
+        box(0, -dFilB/2, 1, dFilB/2, 'FILIERE'),
+        bEnd()].join(sep);
+
+    // PLAN_FILIERE2 : idem mais pour filière haute
+    const blkPlanFil2 = FIL2 ? [bHdr('PLAN_FILIERE2'),
+        box(0, -dFil2/2, 1, dFil2/2, 'FILIERE2'),
+        bEnd()].join(sep) : null;
+
+    // PLAN_MC : 1mm large × dMC, échelle X=lt à l'insert
+    const blkPlanMC = [bHdr('PLAN_MC'),
+        box(0, -dMC/2, 1, dMC/2, 'MAIN_COURANTE'),
+        bEnd()].join(sep);
+
+    // VUE_DESSUS : assemblage via INSERT des blocs plan
+    function buildPlanAssembly() {
+        const e = [];
+        e.push(txt(r.lt/2, maxD*0.5+40, 10, 'VUE DE DESSUS', 1));
+        let xp = 0;
+        for (let i=0; i<r.nm; i++) {
+            e.push(ins('PLAN_MONTANT', xp, 0));
+            if (i<r.nm-1) {
+                const xL = xp+r.dm;
+                e.push(ins('PLAN_FILIERE', xL, 0, r.vpi, 1));
+                if (FIL2) e.push(ins('PLAN_FILIERE2', xL, 0, r.vpi, 1));
+                xp += r.dm+r.vide;
+                for (let j=0; j<r.nbBar; j++) {
+                    e.push(ins('PLAN_BARREAU', xp, 0));
+                    xp += r.db+r.vide;
+                }
+            } else { xp += r.dm; }
+        }
+        e.push(ins('PLAN_MC', 0, 0, r.lt, 1));
+        return e.join(sep);
+    }
+    const blkVueDessus = [bHdr('VUE_DESSUS'), buildPlanAssembly(), bEnd()].join(sep);
+
+    /* ═══ BLOCS ISOLÉS + RÉCAP + DÉBITAGE ═══ */
+    const gap  = 200;
+    const xS1  = r.lt + gap;
+    const xS2  = xS1 + r.dm + gap;
+    const xS3  = xS2 + r.db + gap;
+    const xS4  = xS3 + BP_W + gap;
+    const xRec = xS4 + BP_W + gap;
+    const yLab = -40;
+    const yTop2 = H + MC_H + 50;
+
+    const isolated = [
+        ins('MONTANT', xS1, 0),
+        txt(xS1+r.dm/2, yTop2,    10, 'MONTANT',    1),
+        txt(xS1+r.dm/2, yLab,     10, secDXF(r.dm,r.dm2)+' mm', 1),
+        txt(xS1+r.dm/2, yLab-18,  10, `BP ${BP_W}x${BP_H}`, 1),
+
+        ins('BARREAU', xS2, BAR_Y),
+        txt(xS2+r.db/2, yTop2,    10, 'BARREAU',    1),
+        txt(xS2+r.db/2, yLab,     10, secDXF(r.db,r.db2)+' mm', 1),
+        txt(xS2+r.db/2, yLab-18,  10, `h=${BAR_H}`, 1),
+
+        ins('FILIERE', xS3, FIL_Y, BP_W, 1),
+        txt(xS3+BP_W/2, yTop2,    10, 'FILIERE BASSE', 1),
+        txt(xS3+BP_W/2, yLab,     10, secDXF(r.filiereW,r.filiereH2)+' mm', 1),
+        txt(xS3+BP_W/2, yLab-18,  10, `sol+${FIL_Y_TOP}`, 1),
+
+        ins('MAIN_COURANTE', xS4, H, BP_W, 1),
+        txt(xS4+BP_W/2, yTop2,    10, 'MAIN COURANTE', 1),
+        txt(xS4+BP_W/2, yLab,     10, secDXF(r.mcW,r.mcH2)+' mm', 1),
+
+        ...(FIL2?[
+            ins('FILIERE2', xS3+BP_W+gap, FIL2_Y, BP_W, 1),
+            txt(xS3+BP_W+gap+BP_W/2, yTop2, 10, 'FILIERE HAUTE', 1),
+            txt(xS3+BP_W+gap+BP_W/2, yLab,  10, secDXF(r.fil2W,r.fil2H2)+' mm', 1),
+        ]:[]),
+    ].join(sep);
+
+    /* ── Récap dimensionnel ── */
+    const recap = (()=>{
+        const xT=xRec, dy=16;
+        const rows=[
+            txt(xT, H+MC_H+80, 15, r.ref||gcName),
+            r.chantier?txt(xT,H+MC_H+60,10,`Chantier: ${r.chantier}`):'',
+            txt(xT, H+MC_H+30, 10, `L=${r.lt}mm  N=${r.nm}mont.  e=${r.dm}  ${r.nbTot}barr. d=${r.db}`),
+            txt(xT, H-dy*0,  10, `Entraxe montants : ${r.emont.toFixed(1)} mm`),
+            txt(xT, H-dy*1,  10, `Vide/montants    : ${r.vpi.toFixed(1)} mm`),
+            txt(xT, H-dy*2,  10, `Barreaux/int.    : ${r.nbBar}`),
+            txt(xT, H-dy*3,  10, `Vide barreaux    : ${r.vide.toFixed(1)} mm`),
+            txt(xT, H-dy*4,  10, `Filiere basse    : sol+${FIL_Y_TOP}mm h=${FIL_H}mm`),
+            txt(xT, H-dy*5,  10, `Barreaux y       : ${BAR_Y}->${BAR_TOP}mm`),
+            txt(xT, H-dy*6,  10, `Main courante    : ${MC_H}mm  y=${H}`),
+            FIL2?txt(xT,H-dy*7,10,`Filiere haute    : MC-${FIL2_D}mm h=${FIL2_H}mm`):'',
+            txt(xT, H-dy*8,  10, `Plaque base      : ${BP_W}x${BP_H}mm`),
+            txt(xT, H-dy*10, 15,
+                r.conf?`CONFORME vide=${r.vide.toFixed(1)}<=119mm`
+                      :`NON CONFORME vide=${r.vide.toFixed(1)}>119mm`),
+        ].filter(Boolean).join(sep);
+        return rows;
+    })();
+
+    /* ── Liste de débitage ── */
+    const debit = (()=>{
+        const items=genererDebitage(r);
+        const xD=xRec+550, dy2=16;
+        const rows=[
+            txt(xD, H+MC_H+80, 15, 'LISTE DE DEBITAG E'),
+            txt(xD, H+MC_H+55, 10, `${r.ref||gcName}`),
+            txt(xD, H+MC_H+30, 10, 'REPERE             SECTION       L(mm)  QTE  L.TOT'),
+            txt(xD, H+MC_H+12, 10, '-------------------------------------------------------'),
+        ];
+        let yy=H+MC_H-8;
+        items.forEach(it=>{
+            const lt=+(it.l*it.qte).toFixed(1);
+            rows.push(txt(xD, yy, 10,
+                `${pad(it.rep,18)} ${pad(it.sec,13)} ${pad(it.l.toFixed(1),7)} ${pad(String(it.qte),4)}  ${lt.toFixed(1)}`));
+            yy-=dy2;
+        });
+        return rows.filter(Boolean).join(sep);
+    })();
+
+    /* ═══ CALQUES + STYLE ═══ */
+    const LAYER_COLS = {
+        MONTANTS:      1,   // rouge
+        BARREAUX:      5,   // bleu
+        FILIERE:       3,   // vert
+        MAIN_COURANTE: 6,   // magenta
+        FILIERE2:      30,  // brun-orange foncé
+    };
+    const CAL = ['MONTANTS','BARREAUX','FILIERE','MAIN_COURANTE'];
+    if (FIL2) CAL.push('FILIERE2');
+    const layerRows = CAL.map(n=>
+        ['  0','LAYER','  2',n,' 70','0',' 62',String(LAYER_COLS[n]??7),'  6','CONTINUOUS'].join(sep)
+    );
+
+    /* ═══ ASSEMBLAGE FINAL ═══ */
+    const header = ['  0','SECTION','  2','HEADER',
+        '  9','$ACADVER','  1','AC1009',
+        '  9','$INSUNITS',' 70','4',
+        '  0','ENDSEC'].join(sep);
+
+    const tables = ['  0','SECTION','  2','TABLES',
+        // STYLE table avec ISOCPEUR
+        '  0','TABLE','  2','STYLE',' 70','2',
+        '  0','STYLE','  2','STANDARD',' 70','0',' 40','0.0000',' 41','1.0000',' 50','0.0000',' 71','0',' 42','0.2500','  3','txt.shx','  4','',
+        '  0','STYLE','  2','ISOC','    70','0',' 40','0.0000',' 41','1.0000',' 50','0.0000',' 71','0',' 42','0.2500','  3','isocpeur.shx','  4','',
+        '  0','ENDTAB',
+        // LAYER table
+        '  0','TABLE','  2','LAYER',' 70',String(CAL.length),
+        layerRows.join(sep),
+        '  0','ENDTAB',
+        '  0','ENDSEC'].join(sep);
+
+    const blockList=[blkMontant,blkBarreau,blkFiliere,blkMC,
+        blkPlanMont,blkPlanBarr,blkPlanFil,blkPlanMC,blkVueDessus];
+    if (FIL2&&blkFiliere2) blockList.push(blkFiliere2);
+    if (FIL2&&blkPlanFil2) blockList.push(blkPlanFil2);
+    blockList.push(blkGC);
+
+    const blocks=['  0','SECTION','  2','BLOCKS',
+        '  0','BLOCK','  8','0','  2','*MODEL_SPACE',' 70','0',
+        ' 10','0.0000',' 20','0.0000',' 30','0.0000','  3','*MODEL_SPACE','  1','','  0','ENDBLK',
+        ...blockList,'  0','ENDSEC'].join(sep);
+
+    const entities=['  0','SECTION','  2','ENTITIES',
+        ins(gcName,0,0),
+        ins('VUE_DESSUS', 0, yPlan),  // vue de dessus insérée sous l'élévation
+        isolated,
+        recap,
+        debit,
+        '  0','ENDSEC'].join(sep);
+
+    return [header,tables,blocks,entities,'  0'+sep+'EOF'].join(sep);
+}
+
+function telechargerDXF(r, filename) {
+    const dxf  = genererDXF(r);
+    const blob = new Blob([dxf], {type:'application/dxf'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exporterDXF() {
+    if (!lastResult) { alert('Effectuez d\'abord un calcul.'); return; }
+    const ref  = (lastResult.ref||'position').replace(/[^a-zA-Z0-9_-]/g,'_');
+    telechargerDXF(lastResult, `barreaudage_${ref}.dxf`);
+}
+
+function exporterDXFid(id) {
+    const pos = positions.find(p=>p.id===id);
+    if (!pos) return;
+    const ref = (pos.ref||'position').replace(/[^a-zA-Z0-9_-]/g,'_');
+    telechargerDXF(pos, `barreaudage_${ref}.dxf`);
+}
+
+function imprimerTout() {
+    if (!positions.length){alert('Aucune position à imprimer.');return;}
+    const date=new Date().toLocaleDateString('fr-CH');
+    const ok=positions.filter(p=>p.conf).length;
+    const ch=document.getElementById('nomChantier').value.trim()||positions[0]?.chantier||'';
+    const rows=positions.map((p,i)=>{
+        const c=p.conf?'<span style="color:#065f46;font-weight:700">✔ OUI</span>':'<span style="color:#991b1b;font-weight:700">✖ NON</span>';
+        return `<tr>
+            <td>${i+1}</td><td><strong>${escHtml(p.ref)}</strong></td>
+            <td>${p.lt.toFixed(0)}</td><td>${p.videMaco?p.videMaco.toFixed(0)+'<br><small>−${p.retraitG||0}/−${p.retraitD||0}</small>':'—'}</td>
+            <td>${p.nm}×e:${p.dm}</td><td>${p.emont.toFixed(2)}</td>
+            <td>${p.nbTot}×∅${p.db}</td>
+            <td style="color:${p.conf?'inherit':'#991b1b'};font-weight:${p.conf?'normal':'700'}">${p.vide.toFixed(2)}</td><td>${c}</td>
+        </tr>`;
+    }).join('');
+    ouvrirFenetrePrint(`
+        <div class="pf-header">
+            <div><h2>⊞ Récapitulatif Garde-corps</h2>
+            ${ch?`<div class="pf-chantier">🏗 Chantier : <strong>${escHtml(ch)}</strong></div>`:''}
+            <div style="color:#888;font-size:.82em;margin-top:3px;">${positions.length} position(s) — ${ok} conforme(s) / ${positions.length-ok} non conforme(s)</div></div>
+            <div class="pf-meta"><div>Date : ${date}</div><div>Vide max : ${VIDE_MAX} mm</div></div>
+        </div>
+        <table class="pf-sum-table">
+            <thead><tr><th>N°</th><th>Référence</th><th>Long.</th><th>V.maco</th><th>Montants</th><th>E.mont.</th><th>Barreaux</th><th>Vide barr.</th><th>Conf.</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+        <div class="pf-note">BARREAUDAGE CALC — Dominique Rossier</div>
+    `);
+}
+</script>
+</body>
+</html>

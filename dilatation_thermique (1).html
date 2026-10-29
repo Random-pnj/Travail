@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dilatation Thermique — Matériaux de Construction</title>
+<style>
+  :root {
+    --bg:       #1a1a2e;
+    --surface:  #16213e;
+    --card:     #1e2a4a;
+    --border:   #2d3f6b;
+    --accent:   #667eea;
+    --accent2:  #764ba2;
+    --danger:   #e85050;
+    --text:     #e8e8f0;
+    --muted:    #7a8ab0;
+    --green:    #4dcc88;
+    --mono:     'Courier New', Courier, monospace;
+    --sans:     'Segoe UI', Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 18px 32px 14px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+  }
+  header .logo {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--accent);
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding-bottom: 3px;
+  }
+  header .formula {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: var(--card);
+  }
+  header .formula span { color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .main { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  @media (max-width: 900px) { .main { grid-template-columns: 1fr; } }
+
+  .panel {
+    padding: 28px 32px;
+    border-right: 1px solid var(--border);
+  }
+  .panel:last-child { border-right: none; }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── MATERIAL GRID ── */
+  .mat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .mat-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 8px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color .15s, background .15s;
+    color: var(--text);
+  }
+  .mat-btn:hover { border-color: var(--accent); }
+  .mat-btn.active { border-color: var(--accent); background: #1e2d5a; }
+  .mat-btn .mat-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .mat-btn .mat-name { font-size: 11px; font-weight: 600; display: block; }
+  .mat-btn .mat-coef {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* ── INPUTS ── */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 16px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── RESULT BOX ── */
+  .result-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+  .result-box.blue::before { background: var(--accent2); }
+  .result-box.green::before { background: var(--green); }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .result-value {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--accent);
+  }
+  .result-box.blue .result-value { color: var(--accent2); }
+  .result-box.green .result-value { color: var(--green); }
+
+  .result-sub {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── SILICON SECTION ── */
+  .sil-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 12px;
+  }
+  .sil-section h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .sil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sil-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .sil-item .sil-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .sil-item .sil-value {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .sil-item .sil-unit { font-size: 11px; color: var(--muted); }
+  .sil-note { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+  /* ── COMPARISON ── */
+  .comp-mats {
+    display: grid;
+    grid-template-columns: 1fr 28px 1fr;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .comp-vs {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .comp-select {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 13px;
+    padding: 9px 12px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .comp-select:focus { border-color: var(--accent); }
+
+  /* ── BAR VISUAL ── */
+  .bar-visual { margin: 20px 0 16px; }
+  .bar-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .bar-track {
+    height: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    position: relative;
+    overflow: visible;
+    margin-bottom: 10px;
+  }
+  .bar-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    border-radius: 3px 0 0 3px;
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(0,0,0,.8);
+    font-weight: bold;
+    min-width: 2px;
+  }
+  .bar-fill-a { background: var(--accent); }
+  .bar-fill-b { background: var(--accent2); }
+  .bar-delta {
+    position: absolute;
+    right: 0; top: -18px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+  }
+
+  .diff-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .diff-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--green);
+  }
+  .diff-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    text-align: center;
+  }
+  .diff-cell .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .diff-cell .val { font-family: var(--mono); font-size: 18px; font-weight: bold; margin-top: 3px; }
+  .diff-cell.a .val { color: var(--accent); }
+  .diff-cell.b .val { color: var(--accent2); }
+  .diff-cell.d .val { color: var(--green); }
+
+  /* ── SILICON NOTE BOX ── */
+  .sil-comp-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 12px;
+  }
+  .sil-comp-box h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .sil-comp-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .sil-comp-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .sil-comp-item .mat-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .sil-comp-item.matA .mat-tag { color: var(--accent); }
+  .sil-comp-item.matB .mat-tag { color: var(--accent2); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 32px;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  footer span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ── TOOLTIP ── */
+  .info-icon {
+    display: inline-block;
+    width: 15px; height: 15px;
+    background: var(--border);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 15px;
+    font-size: 10px;
+    cursor: help;
+    color: var(--muted);
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+
+  /* ── TABS (pour séparateur simple) ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">ΔL · THERMIQUE</div>
+    <div class="subtitle">Calculateur de dilatation thermique — Construction</div>
+  </div>
+  <div class="formula">ΔL = L₀ × <span>α</span> × ΔT</div>
+</header>
+
+<div class="main">
+
+  <!-- ============================================================ PANNEAU GAUCHE -->
+  <div class="panel">
+    <h2>Calcul simple — un matériau</h2>
+
+    <!-- Choix matériau -->
+    <div class="field">
+      <label>Matériau</label>
+      <div class="mat-grid" id="matGrid"></div>
+    </div>
+
+    <!-- Longueur + températures -->
+    <div class="field">
+      <label>Longueur initiale L₀</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="number" id="longueur" value="6000" min="0" step="100" style="flex:1">
+        <select id="unite" style="width:80px;background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:14px;padding:10px 8px;outline:none;">
+          <option value="1">mm</option>
+          <option value="1000">m</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="field">
+        <label>T° pose / min (°C)</label>
+        <input type="number" id="tMin" value="5" step="1">
+      </div>
+      <div class="field">
+        <label>T° service / max (°C)</label>
+        <input type="number" id="tMax" value="60" step="1">
+      </div>
+    </div>
+
+    <!-- Résultats -->
+    <div class="result-box" id="resMain">
+      <div class="result-label">Dilatation ΔL</div>
+      <div class="result-value" id="valDL">—</div>
+      <div class="result-sub" id="subDL">sélectionnez un matériau</div>
+    </div>
+
+    <div class="input-row">
+      <div class="result-box blue">
+        <div class="result-label">ΔT</div>
+        <div class="result-value" id="valDT">—</div>
+        <div class="result-sub">°C</div>
+      </div>
+      <div class="result-box">
+        <div class="result-label">Dilatation %</div>
+        <div class="result-value" id="valPct">—</div>
+        <div class="result-sub">de L₀</div>
+      </div>
+    </div>
+
+    <div class="result-box green">
+      <div class="result-label">Longueur finale</div>
+      <div class="result-value" id="valLf">—</div>
+      <div class="result-sub" id="subLf"></div>
+    </div>
+
+    <!-- Section silicone -->
+    <div class="sil-section" id="silSection" style="display:none;">
+      <h3>🔶 Joint silicone recommandé</h3>
+      <div class="sil-grid">
+        <div class="sil-item">
+          <div class="sil-label">Largeur joint min.</div>
+          <div class="sil-value" id="silLarg">—</div>
+          <div class="sil-unit">mm</div>
+        </div>
+        <div class="sil-item">
+          <div class="sil-label">Largeur joint recommandée</div>
+          <div class="sil-value" id="silReco">—</div>
+          <div class="sil-unit">mm</div>
+        </div>
+        <div class="sil-item">
+          <div class="sil-label">Épaisseur joint</div>
+          <div class="sil-value" id="silEp">—</div>
+          <div class="sil-unit">mm</div>
+        </div>
+        <div class="sil-item">
+          <div class="sil-label">Rapport l/e</div>
+          <div class="sil-value" id="silRatio">—</div>
+          <div class="sil-unit">(idéal ≥ 2)</div>
+        </div>
+      </div>
+      <div class="sil-note" id="silNote"></div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ PANNEAU DROIT -->
+  <div class="panel">
+    <h2>Comparaison de deux matériaux</h2>
+
+    <div class="comp-mats">
+      <select class="comp-select" id="compA" onchange="calcComp()"></select>
+      <div class="comp-vs">↔</div>
+      <select class="comp-select" id="compB" onchange="calcComp()"></select>
+    </div>
+
+    <div class="input-row">
+      <div class="field">
+        <label>Longueur initiale (mm)</label>
+        <input type="number" id="compLen" value="6000" min="0" step="100" oninput="calcComp()">
+      </div>
+      <div class="field">
+        <label>ΔT (°C)</label>
+        <input type="number" id="compDT" value="55" step="1" oninput="calcComp()">
+      </div>
+    </div>
+
+    <!-- Barres visuelles -->
+    <div class="bar-visual">
+      <div class="bar-label" id="barLabelA">Matériau A</div>
+      <div class="bar-track">
+        <div class="bar-fill bar-fill-a" id="barA" style="width:50%"></div>
+      </div>
+      <div class="bar-label" id="barLabelB">Matériau B</div>
+      <div class="bar-track">
+        <div class="bar-fill bar-fill-b" id="barB" style="width:30%"></div>
+      </div>
+    </div>
+
+    <!-- Résultats comparatifs -->
+    <div class="diff-box">
+      <div class="diff-row">
+        <div class="diff-cell a">
+          <div class="lbl" id="lblA">Mat. A</div>
+          <div class="val" id="compDLA">—</div>
+          <div class="lbl">mm</div>
+        </div>
+        <div class="diff-cell b">
+          <div class="lbl" id="lblB">Mat. B</div>
+          <div class="val" id="compDLB">—</div>
+          <div class="lbl">mm</div>
+        </div>
+        <div class="diff-cell d">
+          <div class="lbl">Différence</div>
+          <div class="val" id="compDiff">—</div>
+          <div class="lbl" id="compDiffPct"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Détails -->
+    <div style="margin-top:14px;">
+      <div class="input-row">
+        <div class="result-box">
+          <div class="result-label" id="compAlphaALabel">α mat. A</div>
+          <div class="result-value" id="compAlphaA" style="font-size:18px;">—</div>
+          <div class="result-sub">×10⁻⁶/°C</div>
+        </div>
+        <div class="result-box blue">
+          <div class="result-label" id="compAlphaBLabel">α mat. B</div>
+          <div class="result-value" id="compAlphaB" style="font-size:18px;">—</div>
+          <div class="result-sub">×10⁻⁶/°C</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section silicone comparaison -->
+    <div class="sil-comp-box" id="silCompBox">
+      <h3>🔶 Joints silicone — comparatif</h3>
+      <div class="sil-comp-row">
+        <div class="sil-comp-item matA" id="silCompA">
+          <div class="mat-tag" id="silCompATag">Mat. A</div>
+          <div style="font-size:12px;color:var(--muted);">Calcul en cours...</div>
+        </div>
+        <div class="sil-comp-item matB" id="silCompB">
+          <div class="mat-tag" id="silCompBTag">Mat. B</div>
+          <div style="font-size:12px;color:var(--muted);">Calcul en cours...</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;">
+        Le silicone standard supporte ±25 % de déformation. La largeur de joint recommandée intègre un facteur de sécurité ×2.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <span>📐 ΔL = L₀ × α × ΔT</span>
+  <span>🌡️ Valeurs α selon normes EN / SIA</span>
+  <span>🔶 Silicone : déformation admissible ±25 %</span>
+  <span>⚠️ Résultats indicatifs — vérifier selon application</span>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// DONNÉES MATÉRIAUX  α en 10⁻⁶/°C
+// ══════════════════════════════════════════════════════════════════
+const MATERIAUX = [
+  {
+    id: 'acier',
+    nom: 'Acier S235/S355',
+    icon: '🔩',
+    alpha: 12.0,
+    desc: 'Construction, charpente',
+    couleur: '#888888',
+    silicone: 'neutre acétique ou neutre alcoxy',
+    normes: 'EN 10025, SIA 263',
+  },
+  {
+    id: 'inox',
+    nom: 'Inox 304/316',
+    icon: '⚙️',
+    alpha: 16.0,
+    desc: 'Garde-corps, façade',
+    couleur: '#b0b8c8',
+    silicone: 'neutre alcoxy (anti-corrosion)',
+    normes: 'EN 10088, SIA 263',
+  },
+  {
+    id: 'marache',
+    nom: 'Alu / Marache',
+    icon: '🪟',
+    alpha: 23.0,
+    desc: 'Menuiserie, châssis',
+    couleur: '#d4a84b',
+    silicone: 'neutre alcoxy, compatible alu',
+    normes: 'EN 573, SIA 263',
+  },
+  {
+    id: 'verre',
+    nom: 'Verre float',
+    icon: '🪟',
+    alpha: 9.0,
+    desc: 'Vitrage, paroi',
+    couleur: '#7dd4f0',
+    silicone: 'structurel ou neutre alcoxy',
+    normes: 'EN 572, SIA 330',
+  },
+  {
+    id: 'beton',
+    nom: 'Béton armé',
+    icon: '🏗️',
+    alpha: 10.0,
+    desc: 'Structure, dalle',
+    couleur: '#9a9a8a',
+    silicone: 'polyuréthane ou silicone neutre',
+    normes: 'EN 1992, SIA 262',
+  },
+  {
+    id: 'bois',
+    nom: 'Bois (// fil)',
+    icon: '🪵',
+    alpha: 5.0,
+    desc: 'Charpente, parquet',
+    couleur: '#a0724a',
+    silicone: 'polyuréthane ou acrylique',
+    normes: 'EN 14080, SIA 265',
+  },
+  {
+    id: 'cuivre',
+    nom: 'Cuivre',
+    icon: '🔶',
+    alpha: 17.0,
+    desc: 'Toiture, façade',
+    couleur: '#c87533',
+    silicone: 'neutre alcoxy (anti-tache)',
+    normes: 'EN 1172',
+  },
+  {
+    id: 'zinc',
+    nom: 'Zinc',
+    icon: '🪣',
+    alpha: 22.0,
+    desc: 'Toiture, gouttière',
+    couleur: '#708090',
+    silicone: 'neutre alcoxy ou polyuréthane',
+    normes: 'EN 988',
+  },
+  {
+    id: 'plastique',
+    nom: 'PVC rigide',
+    icon: '🧱',
+    alpha: 70.0,
+    desc: 'Profilés, gouttières',
+    couleur: '#e8e0d0',
+    silicone: 'silicone neutre ou colle PVC',
+    normes: 'EN 1329',
+  },
+];
+
+// ══════════════════════════════════════════════════════════════════
+// CONSTRUCTION UI
+// ══════════════════════════════════════════════════════════════════
+let selectedMat = null;
+
+function buildMaterialGrid() {
+  const grid = document.getElementById('matGrid');
+  grid.innerHTML = '';
+  MATERIAUX.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'mat-btn';
+    btn.dataset.id = m.id;
+    btn.innerHTML = `
+      <span class="mat-icon">${m.icon}</span>
+      <span class="mat-name">${m.nom}</span>
+      <span class="mat-coef">α = ${m.alpha} ×10⁻⁶</span>
+    `;
+    btn.addEventListener('click', () => selectMat(m.id));
+    grid.appendChild(btn);
+  });
+}
+
+function buildCompareSelects() {
+  ['compA','compB'].forEach((id, idx) => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '';
+    MATERIAUX.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = `${m.nom} (α=${m.alpha})`;
+      sel.appendChild(opt);
+    });
+    sel.selectedIndex = idx === 0 ? 0 : 1;
+  });
+}
+
+function selectMat(id) {
+  selectedMat = id;
+  document.querySelectorAll('.mat-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.id === id);
+  });
+  calcSimple();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CALCUL SIMPLE
+// ══════════════════════════════════════════════════════════════════
+function fmt(val, dec=2) {
+  if (isNaN(val) || val === null) return '—';
+  return val.toFixed(dec).replace('.', ',');
+}
+
+function calcSilicone(deltaL_mm) {
+  // Règle pratique : silicone admet ±25% déformation
+  // Largeur min = ΔL / 0.25 = ΔL × 4
+  // Largeur recommandée = ΔL × 8 (facteur sécu ×2)
+  // Épaisseur = largeur / 2 (rapport l/e recommandé ≥ 2)
+  const adm = 0.25; // déformation admissible
+  const dL = Math.abs(deltaL_mm);
+  if (dL <= 0) return null;
+  const lMin = Math.ceil(dL / adm);
+  const lReco = Math.max(Math.ceil(lMin * 2), 6); // minimum pratique 6mm
+  const ep = Math.max(Math.ceil(lReco / 2), 4); // minimum pratique 4mm
+  const ratio = (lReco / ep).toFixed(1);
+  return { lMin, lReco, ep, ratio };
+}
+
+function calcSimple() {
+  if (!selectedMat) return;
+  const mat = MATERIAUX.find(m => m.id === selectedMat);
+  const L0mm = parseFloat(document.getElementById('longueur').value) *
+               parseFloat(document.getElementById('unite').value);
+  const tMin = parseFloat(document.getElementById('tMin').value);
+  const tMax = parseFloat(document.getElementById('tMax').value);
+
+  if (isNaN(L0mm) || isNaN(tMin) || isNaN(tMax)) return;
+
+  const dT = tMax - tMin;
+  const alpha = mat.alpha * 1e-6;
+  const dL = L0mm * alpha * dT;
+  const Lf = L0mm + dL;
+  const pct = (dL / L0mm) * 100;
+
+  const unite = document.getElementById('unite').selectedIndex === 0 ? 'mm' : 'm';
+  const facteur = parseFloat(document.getElementById('unite').value);
+  const L0_affich = parseFloat(document.getElementById('longueur').value);
+
+  document.getElementById('valDL').textContent = fmt(dL, 2) + ' mm';
+  document.getElementById('subDL').textContent =
+    `${mat.nom} — α = ${mat.alpha} ×10⁻⁶/°C`;
+  document.getElementById('valDT').textContent = fmt(dT, 1);
+  document.getElementById('valPct').textContent = fmt(pct, 4) + ' %';
+  document.getElementById('valLf').textContent = fmt(Lf, 2) + ' mm';
+  document.getElementById('subLf').textContent =
+    `L₀ = ${fmt(L0mm, 0)} mm  →  Lf = ${fmt(Lf, 2)} mm`;
+
+  // Silicone
+  const sil = calcSilicone(dL);
+  const silSec = document.getElementById('silSection');
+  if (sil) {
+    silSec.style.display = 'block';
+    document.getElementById('silLarg').textContent = sil.lMin;
+    document.getElementById('silReco').textContent = sil.lReco;
+    document.getElementById('silEp').textContent = sil.ep;
+    document.getElementById('silRatio').textContent = sil.ratio;
+    const advice = dL > 0 ? 'dilatation' : 'retrait';
+    document.getElementById('silNote').innerHTML =
+      `<b>Type conseillé :</b> ${mat.silicone}<br>` +
+      `<b>Norme :</b> ${mat.normes}<br>` +
+      `Jeu de pose prévu pour un ${advice} de <b>${fmt(Math.abs(dL), 2)} mm</b> sur ${fmt(L0mm,0)} mm.` +
+      (dL > 3 ? `<br>⚠️ Joint de dilatation structurel recommandé si ΔL > 3 mm.` : '');
+  } else {
+    silSec.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CALCUL COMPARATIF
+// ══════════════════════════════════════════════════════════════════
+function calcComp() {
+  const idA = document.getElementById('compA').value;
+  const idB = document.getElementById('compB').value;
+  const matA = MATERIAUX.find(m => m.id === idA);
+  const matB = MATERIAUX.find(m => m.id === idB);
+  const L0 = parseFloat(document.getElementById('compLen').value);
+  const dT = parseFloat(document.getElementById('compDT').value);
+
+  if (isNaN(L0) || isNaN(dT) || !matA || !matB) return;
+
+  const dLA = L0 * matA.alpha * 1e-6 * dT;
+  const dLB = L0 * matB.alpha * 1e-6 * dT;
+  const diff = Math.abs(dLA - dLB);
+  const maxDL = Math.max(Math.abs(dLA), Math.abs(dLB));
+  const pctDiff = maxDL > 0 ? (diff / maxDL * 100) : 0;
+
+  // Labels
+  document.getElementById('lblA').textContent = matA.nom;
+  document.getElementById('lblB').textContent = matB.nom;
+  document.getElementById('barLabelA').textContent = matA.nom;
+  document.getElementById('barLabelB').textContent = matB.nom;
+  document.getElementById('compAlphaALabel').textContent = `α — ${matA.nom}`;
+  document.getElementById('compAlphaBLabel').textContent = `α — ${matB.nom}`;
+
+  // Valeurs
+  document.getElementById('compDLA').textContent = fmt(dLA, 2);
+  document.getElementById('compDLB').textContent = fmt(dLB, 2);
+  document.getElementById('compDiff').textContent = fmt(diff, 2);
+  document.getElementById('compDiffPct').textContent =
+    fmt(pctDiff, 1) + ' % d\'écart';
+  document.getElementById('compAlphaA').textContent = matA.alpha;
+  document.getElementById('compAlphaB').textContent = matB.alpha;
+
+  // Barres proportionnelles
+  if (maxDL > 0) {
+    const wA = (Math.abs(dLA) / maxDL * 85).toFixed(1);
+    const wB = (Math.abs(dLB) / maxDL * 85).toFixed(1);
+    document.getElementById('barA').style.width = wA + '%';
+    document.getElementById('barB').style.width = wB + '%';
+    document.getElementById('barA').textContent = fmt(dLA,2) + ' mm';
+    document.getElementById('barB').textContent = fmt(dLB,2) + ' mm';
+  }
+
+  // Silicone comparatif
+  const silA = calcSilicone(dLA);
+  const silB = calcSilicone(dLB);
+
+  document.getElementById('silCompATag').textContent = matA.nom;
+  document.getElementById('silCompBTag').textContent = matB.nom;
+
+  function silHtml(sil, mat) {
+    if (!sil) return '<div style="font-size:12px;color:var(--muted);">ΔL nul</div>';
+    return `
+      <div style="font-size:12px;line-height:1.8;">
+        Largeur min : <b>${sil.lMin} mm</b><br>
+        Recommandée : <b>${sil.lReco} mm</b><br>
+        Épaisseur : <b>${sil.ep} mm</b><br>
+        Type : <span style="color:var(--text);font-size:11px;">${mat.silicone}</span>
+      </div>`;
+  }
+
+  document.getElementById('silCompA').innerHTML =
+    `<div class="mat-tag" style="color:var(--accent);">${matA.nom}</div>` + silHtml(silA, matA);
+  document.getElementById('silCompB').innerHTML =
+    `<div class="mat-tag" style="color:var(--accent2);">${matB.nom}</div>` + silHtml(silB, matB);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+buildMaterialGrid();
+buildCompareSelects();
+
+['longueur','unite','tMin','tMax'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calcSimple);
+});
+
+// Sélection initiale
+selectMat('acier');
+calcComp();
+</script>
+</body>
+</html>

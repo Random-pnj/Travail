@@ -1,0 +1,833 @@
+<title>Tablette de Fenêtre</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/*
+  Layout: deux colonnes — saisie gauche, schéma + résultats droite
+  Palette : acier brossé industriel, accent orange oxyde
+  Profil tablette : [retour écrasé] — [larmier] — [pente] — [partie verticale mur]
+*/
+:root {
+  --bg:        #F0F2F5;
+  --surface:   #FFFFFF;
+  --surface2:  #E6E9EE;
+  --border:    #C4C9D4;
+  --fg:        #191C24;
+  --fg2:       #48516A;
+  --accent:    #C45518;
+  --accent-bg: #FAF0EA;
+  --ok:        #1A7845;
+  --ok-bg:     #E6F4EC;
+  --blue:      #1A5CA0;
+  --blue-bg:   #E6EEF8;
+  --purple:    #6A3AB0;
+  --purple-bg: #F0EAF8;
+  --mono:      'IBM Plex Mono', monospace;
+  --sans:      'IBM Plex Sans', system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #11131A;
+    --surface:   #1C1F28;
+    --surface2:  #252830;
+    --border:    #343A4A;
+    --fg:        #E2E6EE;
+    --fg2:       #8890A8;
+    --accent:    #DC6E38;
+    --accent-bg: #281810;
+    --ok:        #38A864;
+    --ok-bg:     #10221A;
+    --blue:      #4A8AE0;
+    --blue-bg:   #101828;
+    --purple:    #9A68D8;
+    --purple-bg: #1A1028;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:        #11131A;
+  --surface:   #1C1F28;
+  --surface2:  #252830;
+  --border:    #343A4A;
+  --fg:        #E2E6EE;
+  --fg2:       #8890A8;
+  --accent:    #DC6E38;
+  --accent-bg: #281810;
+  --ok:        #38A864;
+  --ok-bg:     #10221A;
+  --blue:      #4A8AE0;
+  --blue-bg:   #101828;
+  --purple:    #9A68D8;
+  --purple-bg: #1A1028;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--fg);
+  padding: 0 16px;
+  padding-block: max(14px, env(safe-area-inset-top, 14px)) max(16px, env(safe-area-inset-bottom, 16px));
+  min-height: 100%;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 16px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+h1 {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.theme-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--fg2);
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: var(--sans);
+}
+.theme-btn:hover { background: var(--border); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+
+/* Panel */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.phead {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--fg2);
+  padding: 9px 14px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Formulaire */
+.form-inner { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--fg2);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--surface2);
+  margin-bottom: 2px;
+}
+.field label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--fg2);
+  margin-bottom: 4px;
+}
+.field label em { font-style: normal; color: var(--fg); font-weight: 600; }
+.iu {
+  display: flex;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.iu:focus-within { border-color: var(--accent); }
+.iu input {
+  flex: 1; min-width: 0;
+  border: none; background: transparent; color: var(--fg);
+  font-family: var(--mono); font-size: 15px;
+  padding: 7px 9px; outline: none;
+}
+.iu .un {
+  display: flex; align-items: center;
+  padding: 0 9px;
+  font-size: 11px; color: var(--fg2);
+  background: var(--surface2);
+  border-left: 1.5px solid var(--border);
+  white-space: nowrap;
+}
+.fnote { font-size: 10.5px; color: var(--fg2); margin-top: 3px; line-height: 1.5; }
+.divider { border: none; border-top: 1px solid var(--border); }
+
+.calc-btn {
+  width: 100%; padding: 10px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 6px;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  cursor: pointer; letter-spacing: .02em;
+}
+.calc-btn:hover { opacity: .87; }
+
+/* Colonne droite */
+.rcol { display: flex; flex-direction: column; gap: 14px; }
+
+/* Canvas schéma */
+#cnv { width: 100%; display: block; border-radius: 3px; }
+.cnv-wrap { padding: 14px; }
+
+/* Cartes résultats */
+.rgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 14px;
+}
+@media (max-width: 900px) { .rgrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .rgrid { grid-template-columns: 1fr; } }
+
+.rc {
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.rc.accent { background: var(--accent-bg); border: 1px solid var(--accent); }
+.rc.ok     { background: var(--ok-bg);     border: 1px solid var(--ok); }
+.rc.blue   { background: var(--blue-bg);   border: 1px solid var(--blue); }
+.rc.purple { background: var(--purple-bg); border: 1px solid var(--purple); }
+.rlbl {
+  font-size: 9.5px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--fg2); margin-bottom: 3px;
+}
+.rc.accent .rlbl { color: var(--accent); }
+.rc.ok     .rlbl { color: var(--ok); }
+.rc.blue   .rlbl { color: var(--blue); }
+.rc.purple .rlbl { color: var(--purple); }
+.rval {
+  font-family: var(--mono); font-size: 20px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg); line-height: 1.1;
+}
+.rc.accent .rval { color: var(--accent); }
+.rc.ok     .rval { color: var(--ok); }
+.rc.blue   .rval { color: var(--blue); }
+.rc.purple .rval { color: var(--purple); }
+.rsub { font-size: 10px; color: var(--fg2); margin-top: 2px; }
+
+/* Tableau développement */
+.tw { padding: 0 14px 14px; overflow-x: auto; }
+.dt {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--mono); font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  min-width: 360px;
+}
+.dt th {
+  text-align: left; font-size: 9.5px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--fg2); padding: 6px 9px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.dt td { padding: 6px 9px; border-bottom: 1px solid var(--surface2); }
+.dt tr:last-child td { border-bottom: none; }
+.dt .hi  { font-weight: 600; color: var(--accent); }
+.dt .ok  { font-weight: 600; color: var(--ok); }
+.dt .bl  { font-weight: 600; color: var(--blue); }
+.dt .pu  { font-weight: 600; color: var(--purple); }
+.dt .tot { font-weight: 700; background: var(--surface2); }
+
+/* Note */
+.nbox {
+  margin: 0 14px 14px;
+  padding: 9px 11px;
+  background: var(--surface2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  font-size: 11.5px; color: var(--fg2); line-height: 1.6;
+}
+.nbox strong { color: var(--fg); }
+
+/* Profil schéma légende */
+.legend-row {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  padding: 0 14px 12px;
+  font-size: 11px; color: var(--fg2);
+}
+.leg-item { display: flex; align-items: center; gap: 5px; }
+.leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+</style>
+
+<header>
+  <h1><span class="eyebrow">Tôlerie</span> Tablette de Fenêtre — Angle de Coupe</h1>
+  <button class="theme-btn" onclick="toggleTheme()">◐ Thème</button>
+</header>
+
+<div class="layout">
+
+  <!-- FORMULAIRE -->
+  <div class="panel">
+    <div class="phead">Paramètres</div>
+    <div class="form-inner">
+
+      <div class="section-label">Géométrie du raccord</div>
+
+      <div class="field">
+        <label>Angle raccord en plan <em>α</em></label>
+        <div class="iu"><input type="number" id="anglePlan" value="90" min="1" max="179" step="0.5"><span class="un">°</span></div>
+        <div class="fnote">Angle extérieur du pilier vu du dessus (90° = pilier carré). Plus α est grand, plus le pilier est ouvert.</div>
+      </div>
+
+      <div class="field">
+        <label>Pente de la tablette <em>β</em></label>
+        <div class="iu"><input type="number" id="pente" value="5" min="0.5" max="30" step="0.5"><span class="un">°</span></div>
+        <div class="fnote">Inclinaison vers l'extérieur (5° typique pour évacuation).</div>
+      </div>
+
+      <hr class="divider">
+      <div class="section-label">Profil — zones du flan</div>
+
+      <div class="field">
+        <label>① Partie verticale côté mur <em>v</em></label>
+        <div class="iu"><input type="number" id="vertical" value="40" min="0" max="300" step="5"><span class="un">mm</span></div>
+        <div class="fnote">Remontée verticale côté façade/mur (encastrement).</div>
+      </div>
+
+      <div class="field">
+        <label>② Largeur en pente <em>L</em> (proj. horiz.)</label>
+        <div class="iu"><input type="number" id="largeur" value="200" min="10" max="2000" step="5"><span class="un">mm</span></div>
+        <div class="fnote">Distance horizontale façade → bord avant.</div>
+      </div>
+
+      <div class="field">
+        <label>③ Larmier avant <em>h</em></label>
+        <div class="iu"><input type="number" id="larmier" value="40" min="0" max="200" step="5"><span class="un">mm</span></div>
+        <div class="fnote">Retombée verticale avant (goutte d'eau).</div>
+      </div>
+
+      <div class="field">
+        <label>④ Retour écrasé sous larmier <em>r</em></label>
+        <div class="iu"><input type="number" id="retour" value="15" min="0" max="100" step="1"><span class="un">mm</span></div>
+        <div class="fnote">Pli replié vers l'intérieur (vers le mur) sous le larmier — goutte pendante.</div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>Longueur totale de la tablette <em>T</em></label>
+        <div class="iu"><input type="number" id="longueur" value="1200" min="50" max="6000" step="10"><span class="un">mm</span></div>
+        <div class="fnote">Développé le long de la façade (pour info côte globale).</div>
+      </div>
+
+      <hr class="divider">
+      <div class="section-label">Matériau</div>
+
+      <div class="field">
+        <label>Épaisseur tôle <em>e</em></label>
+        <div class="iu"><input type="number" id="epaisseur" value="2" min="0.5" max="6" step="0.5"><span class="un">mm</span></div>
+        <div class="fnote">Rayon intérieur supposé = 0 (pli vif). Correction : e × tan(θ/2) par pli.</div>
+      </div>
+
+      <button class="calc-btn" onclick="calculer()">▶  Calculer</button>
+    </div>
+  </div>
+
+  <!-- RÉSULTATS -->
+  <div class="rcol">
+
+    <div class="panel">
+      <div class="phead">Schéma — coupe transversale du profil</div>
+      <div class="cnv-wrap">
+        <canvas id="cnv" height="260"></canvas>
+      </div>
+      <div class="legend-row" id="legRow"></div>
+    </div>
+
+    <div class="panel">
+      <div class="phead">Résultats — angle de coupe &amp; développement</div>
+
+      <!-- Angles : toujours visibles en haut -->
+      <div class="rgrid" id="rgrid" style="grid-template-columns: repeat(3,1fr)">
+        <div class="rc accent">
+          <div class="rlbl">Angle à reporter</div>
+          <div class="rval" id="r_phi_comp">—</div>
+          <div class="rsub">90°−φ — depuis l'opposé</div>
+        </div>
+        <div class="rc">
+          <div class="rlbl">Demi-angle extérieur</div>
+          <div class="rval" id="r_demi">—</div>
+          <div class="rsub">(180°−α)/2 — sans correction pente</div>
+        </div>
+        <div class="rc">
+          <div class="rlbl">Correction Δφ</div>
+          <div class="rval" id="r_delta">—</div>
+          <div class="rsub">demi − φ (due à la pente)</div>
+        </div>
+      </div>
+      <span id="r_phi" style="display:none">—</span>
+
+      <!-- Développés : cachés dans un détail dépliable -->
+      <details style="margin:0 14px 14px">
+        <summary style="cursor:pointer;font-size:11.5px;color:var(--fg2);padding:8px 0;border-top:1px solid var(--border);list-style:none;display:flex;align-items:center;gap:6px">
+          <span id="sumArrow">▶</span> Développement &amp; zones (cliquer pour afficher)
+        </summary>
+        <div class="rgrid" style="padding:10px 0 0;grid-template-columns:repeat(3,1fr)">
+          <div class="rc blue">
+            <div class="rlbl">① Verticale mur (net)</div>
+            <div class="rval" id="r_vert">—</div>
+            <div class="rsub">v − retrait pli A</div>
+          </div>
+          <div class="rc ok">
+            <div class="rlbl">② Pente développée (net)</div>
+            <div class="rval" id="r_pente">—</div>
+            <div class="rsub">L/cos(β) − plis A+B</div>
+          </div>
+          <div class="rc accent">
+            <div class="rlbl">③ Larmier avant (net)</div>
+            <div class="rval" id="r_larmier">—</div>
+            <div class="rsub">h − plis B+C</div>
+          </div>
+          <div class="rc purple">
+            <div class="rlbl">④ Retour écrasé (net)</div>
+            <div class="rval" id="r_retour">—</div>
+            <div class="rsub">r − pli C (45°)</div>
+          </div>
+          <div class="rc ok">
+            <div class="rlbl">Développé net flan</div>
+            <div class="rval" id="r_total">—</div>
+            <div class="rsub">largeur à couper</div>
+          </div>
+          <div class="rc">
+            <div class="rlbl">Longueur façade T</div>
+            <div class="rval" id="r_T">—</div>
+            <div class="rsub">pour référence</div>
+          </div>
+        </div>
+      </details>
+
+      <div class="nbox" id="nbox">Renseignez les paramètres et cliquez sur <strong>Calculer</strong>.</div>
+
+      <div class="phead" style="border-top:1px solid var(--border)">Détail du développement</div>
+      <div class="tw">
+        <table class="dt">
+          <thead><tr><th>Zone</th><th>Brut</th><th>Retrait plis</th><th>Net à couper</th></tr></thead>
+          <tbody id="dtbody">
+            <tr><td colspan="4" style="color:var(--fg2);padding:16px;text-align:center">— calculer pour afficher —</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const rad = d => d * Math.PI / 180;
+const deg = r => r * 180 / Math.PI;
+const f1  = v => v.toFixed(1).replace('.', ',');
+const fD  = v => f1(v) + '°';
+const fM  = v => f1(v) + ' mm';
+
+/* ================================================================
+   FORMULE ANGLE DE COUPE :
+   φ = arctan( tan(α/2) × cos(β) )
+   φ < α/2 toujours (la pente referme l'angle de coupe sur le développé)
+
+   Zones du profil (de intérieur/mur vers extérieur/avant) :
+   ① partie verticale v → développé brut = v
+   ② pente L            → développé brut = L/cos(β)
+   ③ larmier h          → développé brut = h
+   ④ retour écrasé r    → développé brut = r (45° vers intérieur)
+
+   CORRECTIONS D'ÉPAISSEUR (pli vif, rayon = 0, fibre neutre e/2) :
+   Retrait par pli = e × tan(θ_pli / 2)
+   — Pli ①→② (vertical → pente β) : angle pli = 90° − β  →  retrait A = e × tan((90°−β)/2)
+   — Pli ②→③ (pente → larmier 90°) : angle pli = 90°     →  retrait B = e × tan(45°) = e
+   — Pli ③→④ (larmier → retour 45°) : angle pli = 45°    →  retrait C = e × tan(22,5°)
+
+   Développé net zone = développé brut − retrait amont − retrait aval
+   (chaque pli enlève e×tan(θ/2) sur chacune des deux zones adjacentes)
+================================================================ */
+
+let lastData = null;
+
+function calculer() {
+  const alpha = +$('anglePlan').value;
+  const beta  = +$('pente').value;
+  const r     = +$('retour').value;
+  const v     = +$('vertical').value;
+  const L     = +$('largeur').value;
+  const h     = +$('larmier').value;
+  const T     = +$('longueur').value;
+  const e     = +$('epaisseur').value;
+  if ([alpha,beta,r,v,L,h,T,e].some(isNaN)) return;
+
+  const αr = rad(alpha), βr = rad(beta);
+  // Coin sortant (pilier) : l'angle de coupe se calcule sur le supplément de α
+  const demi = (180 - alpha) / 2;   // demi-angle du coin extérieur
+  const phi  = deg(Math.atan(Math.tan(rad(demi)) * Math.cos(βr)));
+  const delta = demi - phi;
+
+  // Développés bruts
+  const Ldev  = L / Math.cos(βr);
+
+  // Angles de pliage (entre les faces, côté intérieur)
+  const thetaA = 90 - beta;   // pli vert→pente : le pli referme de (90-β)°
+  const thetaB = 90;          // pli pente→larmier : 90°
+  const thetaC = 45;          // pli larmier→retour : 45°
+
+  // Retraits (e × tan(θ/2)), un par côté de chaque pli
+  const rA = e * Math.tan(rad(thetaA / 2));
+  const rB = e * Math.tan(rad(thetaB / 2));  // = e
+  const rC = e * Math.tan(rad(thetaC / 2));
+
+  // Développés nets (zone brute − retrait aval − retrait amont)
+  const v_net    = v    - rA;              // pli A en bas seulement (haut = ancrage mur)
+  const Ldev_net = Ldev - rA - rB;        // pli A en amont, pli B en aval
+  const h_net    = h    - rB - rC;        // pli B en amont, pli C en aval
+  const r_net    = r    - rC;             // pli C en amont seulement (bout libre)
+
+  const totalBrut = v + Ldev + h + r;
+  const totalNet  = v_net + Ldev_net + h_net + r_net;
+  // = totalBrut − 2rA − 2rB − 2rC  (chaque pli retire 2× car partagé)
+  // Vérification : totalNet = totalBrut − 2*(rA+rB+rC)
+
+  const phiComp = 90 - phi;
+  lastData = { alpha, beta, e, r, v, L, h, T, phi, phiComp, demi, delta,
+               Ldev, totalBrut, totalNet,
+               v_net, Ldev_net, h_net, r_net,
+               rA, rB, rC, thetaA, thetaB, thetaC };
+
+  // Cartes
+  $('r_phi').textContent      = fD(phi);
+  $('r_phi_comp').textContent = fD(phiComp);
+  $('r_demi').textContent     = fD(demi);
+  $('r_delta').textContent    = fD(delta);
+  $('r_retour').textContent   = fM(r_net);
+  $('r_vert').textContent     = fM(v_net);
+  $('r_pente').textContent    = fM(Ldev_net);
+  $('r_larmier').textContent  = fM(h_net);
+  $('r_total').textContent    = fM(totalNet);
+  $('r_T').textContent        = fM(T);
+
+  // Tableau
+  const f2 = v => v.toFixed(2).replace('.', ',');
+  $('dtbody').innerHTML = [
+    {cls:'bl', zone:'① Verticale mur',          brut: fM(v),    ret:'-'+fM(rA),            net: fM(v_net),    note:'pli A en bas'},
+    {cls:'ok', zone:'② Pente développée',        brut: fM(Ldev), ret:'-'+fM(rA)+' -'+fM(rB),net: fM(Ldev_net), note:'plis A+B'},
+    {cls:'hi', zone:'③ Larmier avant',           brut: fM(h),    ret:'-'+fM(rB)+' -'+fM(rC),net: fM(h_net),    note:'plis B+C'},
+    {cls:'pu', zone:'④ Retour écrasé (45°)',     brut: fM(r),    ret:'-'+fM(rC),            net: fM(r_net),    note:'pli C amont'},
+    {cls:'tot',zone:'TOTAL développé flan',      brut: fM(totalBrut), ret:'−'+fM(2*(rA+rB+rC)), net: fM(totalNet), note:'largeur à couper'},
+  ].map(({cls,zone,brut,ret,net,note}) =>
+    `<tr><td class="${cls}">${zone}</td>`+
+    `<td style="color:var(--fg2);font-size:11.5px">${brut}</td>`+
+    `<td style="color:var(--fg2);font-size:11px">${ret}</td>`+
+    `<td class="${cls}">${net}</td></tr>`
+  ).join('');
+
+  // Note
+  $('nbox').innerHTML =
+    `Angle de coupe <strong>${fD(phi)}</strong> (ou ${fD(phiComp)} depuis l'opposé). `+
+    `Correction pente : −${fD(delta)} / épaisseur ${fM(e)} → `+
+    `retraits plis : A=${fM(rA)} (${thetaA.toFixed(1)}°), B=${fM(rB)} (90°), C=${fM(rC)} (45°). `+
+    `Développé net à couper : <strong>${fM(totalNet)}</strong> (brut : ${fM(totalBrut)}).`;
+
+  dessin();
+}
+
+/* ================================================================
+   DESSIN — schéma de profil côte vue
+================================================================ */
+function dessin() {
+  if (!lastData) return;
+  const {beta, r, v, L, h, phi, demi, Ldev, total} = lastData;
+
+  const cnv = $('cnv');
+  const dpr = window.devicePixelRatio || 1;
+  const W   = cnv.offsetWidth || 600;
+  const H   = 260;
+  cnv.width  = W * dpr;
+  cnv.height = H * dpr;
+  const ctx = cnv.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const cs = getComputedStyle(document.documentElement);
+  const cSurf   = cs.getPropertyValue('--surface').trim();
+  const cFg     = cs.getPropertyValue('--fg').trim();
+  const cFg2    = cs.getPropertyValue('--fg2').trim();
+  const cAccent = cs.getPropertyValue('--accent').trim();
+  const cOk     = cs.getPropertyValue('--ok').trim();
+  const cBlue   = cs.getPropertyValue('--blue').trim();
+  const cPurple = cs.getPropertyValue('--purple').trim();
+  const cBorder = cs.getPropertyValue('--border').trim();
+
+  ctx.fillStyle = cSurf;
+  ctx.fillRect(0, 0, W, H);
+
+  /* --- Schéma profil côte gauche --- */
+  // On dessine la coupe transversale du profil complet
+  // Zones : retour écrasé | partie verticale | pente | larmier
+  // De gauche (intérieur/mur) vers droite (extérieur/avant)
+
+  const margin = 20;
+  const availW = W * 0.55;
+  const scale  = Math.min((availW - 2*margin) / (total || 1), 1.4);
+
+  // Origine : coin en haut à gauche (début retour écrasé)
+  const ox = margin + 14;
+  const oy = H * 0.30;
+
+  const βr = rad(beta);
+
+  // Coordonnées des points de pli (flan déroulé puis "replié" pour le schéma côté)
+  // On dessine le profil en coupe (vue de côté)
+  // Axe X = horizontal (vers l'extérieur), Y = vertical (vers le bas = descente)
+  // Les longueurs sont celles du développé
+
+  /*
+    Profil de gauche à droite (vue de côté, extérieur = droite) :
+    mur → [① verticale v] → [② pente L] → [③ larmier h vers le bas] → [④ retour r vers l'intérieur/gauche]
+
+    Points :
+    p0 = ancrage mur (haut, côté façade)
+    p1 = bas de la partie verticale = début de la pente
+    p2 = fin de la pente = haut du larmier
+    p3 = bas du larmier = début du retour écrasé
+    p4 = fin du retour écrasé (vers l'intérieur = vers la gauche)
+  */
+  const dropH = L * Math.tan(βr);
+  const maxH  = v + dropH + h;
+  const maxW  = L + r;
+  const pScaleH = (H * 0.72) / (maxH || 1);
+  const pScaleW = (availW * 0.80) / (maxW || 1);
+  const sc = Math.min(pScaleH, pScaleW, 1.4);
+
+  const p0x = ox,        p0y = oy;
+  const p1x = p0x,       p1y = p0y + v * sc;
+  const p2x = p1x + L * sc, p2y = p1y + dropH * sc;
+  const p3x = p2x,       p3y = p2y + h * sc;
+  // retour écrasé : remonte à 45° vers l'intérieur depuis le bas du larmier
+  const p4x = p3x - r * Math.cos(Math.PI/4) * sc;
+  const p4y = p3y - r * Math.sin(Math.PI/4) * sc;
+
+  const ep = 4;
+  function drawZone(x1,y1,x2,y2,col) {
+    ctx.strokeStyle = col; ctx.lineWidth = ep; ctx.lineCap = 'square';
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.lineCap = 'butt';
+  }
+
+  // ① verticale mur
+  drawZone(p0x, p0y, p1x, p1y, cBlue);
+  // ② pente
+  drawZone(p1x, p1y, p2x, p2y, cOk);
+  // ③ larmier
+  drawZone(p2x, p2y, p3x, p3y, cAccent);
+  // ④ retour écrasé (vers l'intérieur)
+  drawZone(p3x, p3y, p4x, p4y, cPurple);
+
+  // Mur (hachurage)
+  ctx.strokeStyle = cFg2; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(p0x, p0y - 18); ctx.lineTo(p0x, p1y + 12); ctx.stroke();
+  for (let i = 0; i < 6; i++) {
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(p0x, p0y - 14 + i * 9); ctx.lineTo(p0x - 12, p0y - 5 + i * 9);
+    ctx.stroke();
+  }
+
+  // Labels
+  ctx.font = 'bold 10.5px IBM Plex Mono, monospace';
+
+  // ① verticale — à gauche
+  ctx.textAlign = 'right'; ctx.fillStyle = cBlue;
+  ctx.fillText('① v=' + f1(v), p0x - 7, (p0y + p1y) / 2 + 4);
+
+  // ② pente — au-dessus du segment
+  ctx.textAlign = 'center'; ctx.fillStyle = cOk;
+  const mx2 = (p1x+p2x)/2, my2 = (p1y+p2y)/2;
+  ctx.fillText("② L'=" + f1(Ldev), mx2 + 8, my2 - 10);
+
+  // ③ larmier — à droite
+  ctx.textAlign = 'left'; ctx.fillStyle = cAccent;
+  ctx.fillText('③ h=' + f1(h), p2x + 7, (p2y + p3y) / 2 + 4);
+
+  // ④ retour écrasé — en dessous
+  ctx.textAlign = 'center'; ctx.fillStyle = cPurple;
+  ctx.fillText('④ r=' + f1(r), (p3x + p4x) / 2, p3y + 14);
+
+  // Label retour : positionné à côté de p4
+  ctx.fillStyle = cPurple;
+  ctx.textAlign = 'right';
+  ctx.fillText('45° ← intérieur', p4x - 4, p4y - 4);
+
+  ctx.textAlign = 'left';
+
+  // Cote L (projection horizontale, en bas)
+  const coteY = Math.max(p3y, p4y) + 22;
+  ctx.strokeStyle = cFg2;
+  ctx.lineWidth = 0.8;
+  ctx.setLineDash([3,2]);
+  ctx.beginPath(); ctx.moveTo(p1x, p1y); ctx.lineTo(p1x, coteY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(p2x, p2y); ctx.lineTo(p2x, coteY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(p1x, coteY); ctx.lineTo(p2x, coteY);
+  ctx.stroke();
+  drawArrowH(ctx, p1x, coteY, p2x, coteY, cFg2);
+  ctx.fillStyle = cFg2;
+  ctx.font = '10px IBM Plex Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('L=' + f1(lastData.L) + ' mm (proj.)', (p1x+p2x)/2, coteY + 13);
+  ctx.textAlign = 'left';
+
+  // Angle β (depuis p1, entre horizontal et plan de pente)
+  if (beta > 0) {
+    ctx.strokeStyle = cFg2;
+    ctx.lineWidth = 1.5;
+    const arcR = 28;
+    ctx.beginPath();
+    ctx.arc(p1x, p1y, arcR, 0, βr);
+    ctx.stroke();
+    ctx.fillStyle = cFg2;
+    ctx.font = 'bold 10px IBM Plex Mono';
+    ctx.fillText('β=' + f1(beta) + '°', p1x + arcR + 4, p1y + 10);
+  }
+
+  /* --- Schéma vue en plan (droite) --- */
+  const planOx = W * 0.6;
+  const planOy = 30;
+  const planW  = W - planOx - 15;
+  const planH2 = H - 60;
+
+  ctx.save();
+  ctx.translate(planOx, planOy);
+
+  ctx.fillStyle = cFg2;
+  ctx.font = '9.5px IBM Plex Mono, monospace';
+  ctx.fillText('VUE EN PLAN — COIN', 0, -5);
+
+  const αr = rad(lastData.alpha);
+  const halfA = αr / 2;
+  const tLen  = Math.min(planH2 * 0.42, planW * 0.8);
+  const ptX   = planW * 0.38, ptY = planH2 * 0.5;
+
+  // Mur façade (pointillé)
+  ctx.strokeStyle = cFg2;
+  ctx.setLineDash([4,3]);
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, ptY); ctx.lineTo(planW * 0.9, ptY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Deux tablettes
+  const ang1 = Math.PI / 2 + halfA;
+  const ang2 = Math.PI / 2 - halfA;
+  const ax1 = ptX + Math.cos(ang1) * tLen, ay1 = ptY + Math.sin(ang1) * tLen;
+  const ax2 = ptX + Math.cos(ang2) * tLen, ay2 = ptY + Math.sin(ang2) * tLen;
+
+  ctx.strokeStyle = cFg;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(ptX,ptY); ctx.lineTo(ax1,ay1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ptX,ptY); ctx.lineTo(ax2,ay2); ctx.stroke();
+
+  // Arc α
+  ctx.strokeStyle = cBlue;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(ptX, ptY, 26, ang1, ang2);
+  ctx.stroke();
+  const midAng = (ang1+ang2)/2;
+  ctx.fillStyle = cBlue;
+  ctx.font = 'bold 11px IBM Plex Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('α='+lastData.alpha+'°', ptX + Math.cos(midAng)*38, ptY + Math.sin(midAng)*38 + 4);
+
+  // Trait de coupe — angle demi en plan (pointillé gris)
+  ctx.strokeStyle = cFg2;
+  ctx.setLineDash([5,3]);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(ptX, ptY);
+  ctx.lineTo(ptX + Math.cos(midAng) * tLen, ptY + Math.sin(midAng) * tLen);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Point raccord
+  ctx.fillStyle = cAccent;
+  ctx.beginPath(); ctx.arc(ptX, ptY, 4, 0, Math.PI*2); ctx.fill();
+
+  // Légende angle φ et α/2
+  ctx.textAlign = 'left';
+  ctx.font = '10px IBM Plex Mono';
+  ctx.fillStyle = cFg2;
+  ctx.fillText('α/2     = '+fD(lastData.demi), 2, planH2 + 10);
+  ctx.fillStyle = cAccent;
+  ctx.fillText('φ       = '+fD(lastData.phi)+' ← depuis la rive', 2, planH2 + 23);
+  ctx.fillText('90°−φ = '+fD(lastData.phiComp)+' ← depuis l\'opposé', 2, planH2 + 36);
+
+  ctx.restore();
+
+  // Légende couleurs
+  $('legRow').innerHTML = [
+    ['① Verticale mur',         cBlue],
+    ['② Pente',                 cOk],
+    ['③ Larmier avant',         cAccent],
+    ['④ Retour écrasé (intér.)', cPurple],
+  ].map(([lbl,col]) =>
+    `<div class="leg-item"><div class="leg-dot" style="background:${col}"></div><span>${lbl}</span></div>`
+  ).join('');
+}
+
+function drawArrowH(ctx, x1, y, x2, y2, col) {
+  const as = 5;
+  ctx.strokeStyle = col; ctx.fillStyle = col;
+  ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x1+as,y-3); ctx.lineTo(x1+as,y+3); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x2,y); ctx.lineTo(x2-as,y-3); ctx.lineTo(x2-as,y+3); ctx.closePath(); ctx.fill();
+}
+
+// Thème
+function toggleTheme() {
+  const r = document.documentElement;
+  const c = r.getAttribute('data-theme');
+  r.setAttribute('data-theme', !c
+    ? (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'light' : 'dark')
+    : c === 'dark' ? 'light' : 'dark');
+  setTimeout(dessin, 40);
+}
+
+window.addEventListener('load', () => {
+  calculer();
+  window.addEventListener('resize', () => { if(lastData) dessin(); });
+});
+document.querySelectorAll('input').forEach(i => i.addEventListener('input', calculer));
+document.querySelector('details').addEventListener('toggle', function() {
+  document.getElementById('sumArrow').textContent = this.open ? '▼' : '▶';
+});
+</script>
