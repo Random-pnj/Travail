@@ -1330,6 +1330,7 @@
                         </tr>
                     </thead>
                     <tbody id="debTableBody"></tbody>
+                    <tfoot id="debTableFoot"></tfoot>
                 </table>
             </div>
 
@@ -3898,6 +3899,20 @@
                 tbody.appendChild(row);
             });
 
+            // ─── Ligne totaux dans le tfoot du tableau débitage ──────────────────
+            const tfoot = document.getElementById('debTableFoot');
+            if (tfoot) {
+                const totalPcsDeb = pieces.reduce((s, p) => s + p.quantite * _getMultChap(p.chapitre), 0);
+                const totalPosDeb = pieces.length;
+                tfoot.innerHTML = `<tr style="background:#667eea; color:white; font-weight:bold; -webkit-print-color-adjust:exact; print-color-adjust:exact;">
+                    <td colspan="3" style="padding:6px 8px; text-align:right; border:1px solid #555;">TOTAL</td>
+                    <td style="padding:6px 8px; border:1px solid #555;"></td>
+                    <td style="padding:6px 8px; text-align:center; border:1px solid #555;">${totalPcsDeb} pcs</td>
+                    <td style="padding:6px 8px; text-align:right; border:1px solid #555;">${fP(poidsPieces)}</td>
+                    <td colspan="2" style="padding:6px 8px; border:1px solid #555; font-size:0.85em; opacity:0.85;">${totalPosDeb} pos.</td>
+                </tr>`;
+            }
+
             // ─── Sauvegarder pour les statistiques ───────────────────────────────
             const totalPiecesDebitage = pieces.reduce((s, p) => s + p.quantite, 0);
             const pertesTotalesDeb = toutesLesBarres.reduce((s, b) => s + b.pertesTotales, 0);
@@ -5744,13 +5759,16 @@
 
             const totalPositions = indexed.length;
             const totalPieces    = indexed.reduce((s, p) => s + p.quantite, 0);
+            const totalPiecesEff = indexed.reduce((s, p) => s + p.quantite * _getMultChap(p.chapitre), 0);
             const totalPoids     = indexed.reduce((s, p) => {
                 const kg = calcPoidsKg(p.profile, p.dimensions, p.longueur, p.matiere || 'acier');
                 return s + (kg !== null ? kg * p.quantite : 0);
             }, 0);
 
             document.getElementById('listeTotalPieces').textContent =
-                `${totalPositions} pos. / ${totalPieces} pcs / ${totalPoids.toFixed(1)} kg`;
+                totalPiecesEff !== totalPieces
+                    ? `${totalPositions} pos. / ${totalPieces} pcs (${totalPiecesEff} eff.) / ${totalPoids.toFixed(1)} kg`
+                    : `${totalPositions} pos. / ${totalPieces} pcs / ${totalPoids.toFixed(1)} kg`;
 
             let html = `<table style="width:100%; border-collapse:collapse; font-family:'Courier New',monospace; font-size:0.82em;">
                 <thead>
@@ -5826,9 +5844,13 @@
             });
 
             // Ligne totaux (12 colonnes)
+            const effTxt = totalPiecesEff !== totalPieces
+                ? `${totalPieces} <span style="font-size:0.82em; opacity:0.8;">(${totalPiecesEff} eff.)</span>`
+                : `${totalPieces}`;
             html += `<tr style="background:#667eea; color:white; font-weight:bold; -webkit-print-color-adjust:exact; print-color-adjust:exact;">
-                <td colspan="4" style="padding:6px 8px; border:1px solid #555; text-align:right;">TOTAUX</td>
-                <td style="padding:6px 8px; border:1px solid #555; text-align:center;">${totalPieces}</td>
+                <td colspan="3" style="padding:6px 8px; border:1px solid #555; text-align:right;">TOTAL</td>
+                <td style="padding:6px 8px; border:1px solid #555; text-align:center;">${totalPositions} pos.</td>
+                <td style="padding:6px 8px; border:1px solid #555; text-align:center;">${effTxt}</td>
                 <td colspan="4" style="padding:6px 8px; border:1px solid #555;"></td>
                 <td style="padding:6px 8px; border:1px solid #555; text-align:right;">${totalPoids.toFixed(2)} kg</td>
                 <td colspan="2" style="padding:6px 8px; border:1px solid #555;"></td>
