@@ -2023,6 +2023,7 @@
                 if (inp) inp.value = newQte;
             }
             _renderPanneauChapitres();
+            autoOptimize();
         }
 
         function inlineQteSet(idx, val) {
@@ -2037,6 +2038,7 @@
                 if (inp && parseInt(inp.value) !== newQte) inp.value = newQte;
             }
             _renderPanneauChapitres();
+            autoOptimize();
         }
 
         function inlineEditLongueur(td, idx) {
@@ -2050,6 +2052,7 @@
                 const newVal = parseFloat(inp.value);
                 if (!isNaN(newVal) && newVal > 0) pieces[idx].longueur = newVal;
                 afficherPieces();
+                autoOptimize();
             }
             inp.addEventListener('blur', commit);
             inp.addEventListener('keydown', e => {
@@ -2106,6 +2109,7 @@
                 pieces[idx].chapitre = newVal.trim();
                 afficherPieces();
                 _updateChapitreSelect();
+                autoOptimize();
             }
             sel.addEventListener('change', () => {
                 if (sel.value !== '') { commit(sel.value); }
@@ -6178,7 +6182,7 @@
             // Enregistrer
             const prefix = hasPrixAny ? 'avec_prix_' : '';
             const dateStr = new Date().toISOString().split('T')[0];
-            await XLS.save(wb, `${prefix}coupe_${noChantier||'export'}_${dateStr}.xlsx`);
+            await XLS.save(wb, `${prefix}Liste de débitage_${noChantier||'export'}_${dateStr}.xlsx`);
         }
 
         function importerExcel(event) {
