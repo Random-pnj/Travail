@@ -2654,10 +2654,19 @@
                 chuteTotal: 0
             };
 
+            let piecesTropLongues = [];
             Object.values(groupes).forEach(groupe => {
                 const toutesLesPieces = groupe.pieces;
                 const maxPiece = Math.max(...toutesLesPieces.map(p => p.longueur));
-                if (maxPiece > longueurUtilisable) return;
+                if (maxPiece > longueurUtilisable) {
+                    // Collecter les pièces trop longues pour avertissement
+                    toutesLesPieces.filter(p => p.longueur > longueurUtilisable).forEach(p => {
+                        if (!piecesTropLongues.find(x => x.longueur === p.longueur && x.profile === p.profile)) {
+                            piecesTropLongues.push({ longueur: p.longueur, profile: p.profile, dimensions: p.dimensions, posNum: p.posNum });
+                        }
+                    });
+                    return;
+                }
 
                 toutesLesPieces.sort((a, b) => b.longueur - a.longueur);
 
@@ -2836,6 +2845,26 @@
             });
 
             document.getElementById('results').classList.add('show');
+
+            // Avertissement pièces trop longues (longueur > longueurBarre - margeTotal)
+            const warnId = 'warnPiecesTooLong';
+            let warnDiv = document.getElementById(warnId);
+            if (!warnDiv) {
+                warnDiv = document.createElement('div');
+                warnDiv.id = warnId;
+                document.getElementById('results').prepend(warnDiv);
+            }
+            if (piecesTropLongues.length > 0) {
+                warnDiv.innerHTML = `<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:7px;padding:10px 14px;margin-bottom:12px;color:#856404;font-size:0.93em;">
+                    <strong>⚠️ Pièces ignorées — longueur supérieure à la longueur utilisable (${longueurBarre} − ${margeTotal} = ${longueurUtilisable} mm) :</strong><br>
+                    ${piecesTropLongues.map(p => `<span style="display:inline-block;margin:3px 6px 0 0;background:#ffc107;color:#000;border-radius:4px;padding:1px 7px;font-weight:bold;">
+                        Pos.${p.posNum} — ${p.longueur} mm (${p.profile}${p.dimensions ? ' ' + p.dimensions : ''})
+                    </span>`).join('')}
+                    <br><small style="display:block;margin-top:5px;">Ces pièces dépassent la longueur utilisable de la barre. Réduisez la marge, augmentez la longueur de barre, ou raccourcissez les pièces.</small>
+                </div>`;
+            } else {
+                warnDiv.innerHTML = '';
+            }
 
             gBarresOpt = toutesLesBarres;
 
@@ -3642,6 +3671,7 @@
             const margeTotal         = isNaN(parseFloat(document.getElementById('margeTotal').value)) ? 150 : parseFloat(document.getElementById('margeTotal').value);
             const perteCoupe         = parseFloat(document.getElementById('perteCoupe').value)    || 3;
             const longueurUtilisable = longueurBarre - margeTotal;
+            const piecesDebTropLongues = [];
 
             document.getElementById('debNoChantier').textContent = document.getElementById('noChantier').value || '-';
             document.getElementById('debPosition').textContent   = document.getElementById('position').value  || '-';
@@ -3684,6 +3714,11 @@
                 instances.sort((a, b) => b.longueur - a.longueur);
 
                 instances.forEach(piece => {
+                    // Pièce plus longue que longueur utilisable → ignorer et enregistrer
+                    if (piece.longueur > longueurUtilisable) {
+                        piecesDebTropLongues.push({ longueur: piece.longueur, profile: piece.profile, dimensions: piece.dimensions, posNum: piece.posNum });
+                        return;
+                    }
                     if (!barresOuvertes[cle]) barresOuvertes[cle] = null;
                     const barre = barresOuvertes[cle];
                     const coupeSiNeeded = barre && barre.pieces.length > 0 ? perteCoupe : 0;
@@ -3957,6 +3992,29 @@
                 poidsOk:         poidsGlobalOk,
                 recapMap
             };
+
+            // ─── Avertissement pièces trop longues (débitage) ───────────────────
+            const warnDebId = 'warnPiecesTooLongDeb';
+            let warnDebDiv = document.getElementById(warnDebId);
+            if (!warnDebDiv) {
+                warnDebDiv = document.createElement('div');
+                warnDebDiv.id = warnDebId;
+                const panelDeb = document.getElementById('panelDeb');
+                if (panelDeb) panelDeb.prepend(warnDebDiv);
+            }
+            if (piecesDebTropLongues.length > 0) {
+                // Dédoublonner par position
+                const unique = piecesDebTropLongues.filter((p, i, arr) => arr.findIndex(x => x.posNum === p.posNum && x.longueur === p.longueur) === i);
+                warnDebDiv.innerHTML = `<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:7px;padding:10px 14px;margin-bottom:12px;color:#856404;font-size:0.93em;">
+                    <strong>⚠️ Pièces ignorées — longueur supérieure à la longueur utilisable (${longueurBarre} − ${margeTotal} = ${longueurUtilisable} mm) :</strong><br>
+                    ${unique.map(p => `<span style="display:inline-block;margin:3px 6px 0 0;background:#ffc107;color:#000;border-radius:4px;padding:1px 7px;font-weight:bold;">
+                        Pos.${p.posNum} — ${p.longueur} mm (${p.profile}${p.dimensions ? ' ' + p.dimensions : ''})
+                    </span>`).join('')}
+                    <br><small style="display:block;margin-top:5px;">Ces pièces dépassent la longueur utilisable. Réduisez la marge, augmentez la longueur de barre, ou raccourcissez les pièces.</small>
+                </div>`;
+            } else {
+                warnDebDiv.innerHTML = '';
+            }
 
             genererStatistiques();
         }
