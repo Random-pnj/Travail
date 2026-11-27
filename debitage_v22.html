@@ -1027,7 +1027,7 @@
         </div>
 
         <!-- Layout principal -->
-        <div class="main-layout no-print">
+        <div class="main-layout no-print inverted">
             <!-- Colonne GAUCHE : saisie (sticky) -->
             <div class="col-saisie">
 
@@ -1060,7 +1060,7 @@
                 </div>
                 <div class="input-group">
                     <label>Marge totale (mm)</label>
-                    <input type="number" id="margeTotal" value="150" step="0.1" onchange="autoOptimize()">
+                    <input type="number" id="margeTotal" value="100" step="0.1" onchange="autoOptimize()">
                 </div>
                 <div class="input-group">
                     <label>Perte par coupe (mm)</label>
@@ -2675,22 +2675,24 @@
                     let trouve = false;
                     for (let barre of barresGroupe) {
                         const espaceNecessaire = piece.longueur + (barre.pieces.length > 0 ? perteCoupe : 0);
-                        if (barre.restant >= espaceNecessaire) {
+                        if (barre.espaceDispo >= espaceNecessaire) {
                             barre.pieces.push(piece);
-                            barre.restant -= espaceNecessaire;
+                            barre.espaceDispo -= espaceNecessaire;
+                            barre.restant     -= espaceNecessaire;
                             barre.pertesTotales += (barre.pieces.length > 1 ? perteCoupe : 0);
                             trouve = true;
                             break;
                         }
                     }
-                    
+
                     if (!trouve) {
                         barresGroupe.push({
                             profile: groupe.profile,
                             dimensions: groupe.dimensions,
                             matiere: groupe.matiere,
                             pieces: [piece],
-                            restant: longueurUtilisable - piece.longueur,
+                            espaceDispo: longueurUtilisable - piece.longueur,
+                            restant: longueurBarre - piece.longueur,
                             pertesTotales: 0
                         });
                     }
@@ -2705,7 +2707,7 @@
 
             // Stats
             const nombreBarres = toutesLesBarres.length;
-            const longueurTotaleBarres = nombreBarres * longueurUtilisable;
+            const longueurTotaleBarres = nombreBarres * longueurBarre;
             const tauxUtilisation = ((statsGlobales.longueurTotaleUtilisee / longueurTotaleBarres) * 100).toFixed(1);
 
             document.getElementById('statBarres').textContent = nombreBarres;
@@ -3724,15 +3726,17 @@
                     const coupeSiNeeded = barre && barre.pieces.length > 0 ? perteCoupe : 0;
                     const besoin = piece.longueur + coupeSiNeeded;
 
-                    if (barre && barre.restant >= besoin) {
+                    if (barre && barre.espaceDispo >= besoin) {
                         barre.pieces.push(piece);
-                        barre.restant -= besoin;
+                        barre.espaceDispo -= besoin;
+                        barre.restant     -= besoin;
                         barre.pertesTotales += coupeSiNeeded;
                     } else {
                         const nouvelleBarre = {
                             profile: p.profile, dimensions: p.dimensions, matiere: mat,
                             pieces: [piece],
-                            restant: longueurUtilisable - piece.longueur,
+                            espaceDispo: longueurUtilisable - piece.longueur,
+                            restant: longueurBarre - piece.longueur,
                             pertesTotales: 0
                         };
                         toutesLesBarres.push(nouvelleBarre);
@@ -3803,8 +3807,8 @@
 
             // ─── Récapitulatif aligné en tableau ─────────────────────────────────
             const metreBarres = nombreBarres * longueurBarre;
-            const metreUtilisable = nombreBarres * longueurUtilisable;
-            const metreChutes = chuteTotal;
+            const metreUtilisable = metreBarres;   // total réel acheté
+            const metreChutes = chuteTotal;         // chute = longueurBarre - pièces - traits de scie
             document.getElementById('debRecap').innerHTML = `
                 <table style="width:100%; border-collapse:collapse; font-size:10pt; font-family:'Courier New',monospace;">
                     <colgroup>
@@ -3977,7 +3981,7 @@
             // ─── Sauvegarder pour les statistiques ───────────────────────────────
             const totalPiecesDebitage = pieces.reduce((s, p) => s + p.quantite, 0);
             const pertesTotalesDeb = toutesLesBarres.reduce((s, b) => s + b.pertesTotales, 0);
-            const metreUtilisableDeb = nombreBarres * longueurUtilisable;
+            const metreUtilisableDeb = nombreBarres * longueurBarre;
             gStatsDeb = {
                 nbPositions:     pieces.length,
                 nbPieces:        totalPiecesDebitage,
