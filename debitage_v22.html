@@ -2913,7 +2913,7 @@
             const position   = (document.getElementById('position').value   || '').trim();
             const dateStr    = new Date().toLocaleDateString('fr-CH');
             const longueurBarre = parseFloat(document.getElementById('longueurBarre').value) || 6000;
-            const margeTotal    = parseFloat(document.getElementById('margeTotal').value)    || 150;
+            const margeTotal    = isNaN(parseFloat(document.getElementById('margeTotal').value)) ? 150 : parseFloat(document.getElementById('margeTotal').value);
             const perteCoupe    = parseFloat(document.getElementById('perteCoupe').value)    || 3;
             const longueurUtilisable = longueurBarre - margeTotal;
 
@@ -3113,39 +3113,56 @@
             const position   = (document.getElementById('position').value   || '').trim();
             const dateStr    = new Date().toLocaleDateString('fr-CH');
             const longueurBarre = parseFloat(document.getElementById('longueurBarre').value) || 6000;
-            const margeTotal    = parseFloat(document.getElementById('margeTotal').value)    || 150;
+            const margeTotal    = isNaN(parseFloat(document.getElementById('margeTotal').value)) ? 150 : parseFloat(document.getElementById('margeTotal').value);
             const perteCoupe    = parseFloat(document.getElementById('perteCoupe').value)    || 3;
             const longueurUtilisable = longueurBarre - margeTotal;
 
-            // ── Recalculer groupMap et recapMap ───────────────────────────────
+            // ── recapMap : nombre de barres depuis l'optimisation déjà calculée ─
             const recapMap = {};
-            const barresOuvertes = {};
-            let toutesLesBarres = [];
             const _orderDeb = displayOrder.length === pieces.length ? displayOrder : pieces.map((_, i) => i);
 
-            pieces.forEach((p, posIdx) => {
+            // Initialiser recapMap depuis la liste des pièces
+            pieces.forEach(p => {
                 const mat = p.matiere || 'acier';
                 const cle = `${p.profile}|${p.dimensions||''}|${mat}`;
-                const posNum = _orderDeb.indexOf(posIdx) + 1;
                 if (!recapMap[cle]) recapMap[cle] = { profile:p.profile, dimensions:p.dimensions, matiere:mat, nbBarres:0 };
-                const qteEff = p.quantite * _getMultChap(p.chapitre);
-                for (let i = 0; i < qteEff; i++) {
-                    const piece = { posNum, longueur:p.longueur, angleGauche:p.angleGauche, angleDroit:p.angleDroit, profile:p.profile, dimensions:p.dimensions, matiere:mat };
-                    if (!barresOuvertes[cle]) barresOuvertes[cle] = null;
-                    const barre = barresOuvertes[cle];
-                    const coupe = barre && barre.pieces.length > 0 ? perteCoupe : 0;
-                    if (barre && barre.restant >= piece.longueur + coupe) {
-                        barre.pieces.push(piece); barre.restant -= piece.longueur + coupe;
-                    } else {
-                        const nb = { profile:p.profile, dimensions:p.dimensions, matiere:mat, pieces:[piece], restant:longueurUtilisable - piece.longueur };
-                        toutesLesBarres.push(nb); barresOuvertes[cle] = nb;
+            });
+
+            // Utiliser gBarresOpt (résultat de l'optimisation) si disponible,
+            // sinon recalculer avec First Fit comme fallback
+            let toutesLesBarres = [];
+            if (gBarresOpt && gBarresOpt.length > 0) {
+                toutesLesBarres = gBarresOpt;
+                toutesLesBarres.forEach(b => {
+                    const cle = `${b.profile}|${b.dimensions||''}|${b.matiere}`;
+                    if (recapMap[cle]) recapMap[cle].nbBarres++;
+                });
+            } else {
+                // Fallback First Fit si l'optimisation n'a pas encore été lancée
+                const barresOuvertes = {};
+                pieces.forEach((p, posIdx) => {
+                    const mat = p.matiere || 'acier';
+                    const cle = `${p.profile}|${p.dimensions||''}|${mat}`;
+                    const posNum = _orderDeb.indexOf(posIdx) + 1;
+                    const qteEff = p.quantite * _getMultChap(p.chapitre);
+                    for (let i = 0; i < qteEff; i++) {
+                        const piece = { posNum, longueur:p.longueur, angleGauche:p.angleGauche, angleDroit:p.angleDroit, profile:p.profile, dimensions:p.dimensions, matiere:mat };
+                        if (!barresOuvertes[cle]) barresOuvertes[cle] = null;
+                        const barre = barresOuvertes[cle];
+                        const coupe = barre && barre.pieces.length > 0 ? perteCoupe : 0;
+                        if (barre && barre.restant >= piece.longueur + coupe) {
+                            barre.pieces.push(piece); barre.restant -= piece.longueur + coupe;
+                        } else {
+                            const nb = { profile:p.profile, dimensions:p.dimensions, matiere:mat, pieces:[piece], restant:longueurUtilisable - piece.longueur };
+                            toutesLesBarres.push(nb); barresOuvertes[cle] = nb;
+                        }
                     }
-                }
-            });
-            toutesLesBarres.forEach(b => {
-                const cle = `${b.profile}|${b.dimensions||''}|${b.matiere}`;
-                if (recapMap[cle]) recapMap[cle].nbBarres++;
-            });
+                });
+                toutesLesBarres.forEach(b => {
+                    const cle = `${b.profile}|${b.dimensions||''}|${b.matiere}`;
+                    if (recapMap[cle]) recapMap[cle].nbBarres++;
+                });
+            }
 
             // ── groupMap : pièces identiques regroupées ───────────────────────
             const groupMap = new Map();
@@ -3288,6 +3305,7 @@
     <span><strong>Position :</strong> ${position||'—'}</span>
     <span><strong>Date :</strong> ${dateStr}</span>
     <span><strong>Barre :</strong> ${longueurBarre} mm (utilisable ${longueurUtilisable} mm)</span>
+    <span><strong>Barres nécessaires :</strong> ${Object.values(recapMap).map(r => { const nom = profileSchemas[r.profile]?.title || r.profile; const dim = r.dimensions ? ' ' + r.dimensions : ''; return `<b style="color:#1a3a6b;">${r.nbBarres}</b> × ${nom}${dim}`; }).join(' &nbsp;|&nbsp; ')}</span>
   </div>
   <div class="stats-bar">
     <div class="stat-box"><div class="lbl">Barres nécessaires</div><div class="val">${totalBarres}</div></div>
@@ -3349,7 +3367,7 @@
             }
 
             const longueurBarre      = parseFloat(document.getElementById('longueurBarre').value) || 6000;
-            const margeTotal         = parseFloat(document.getElementById('margeTotal').value)    || 150;
+            const margeTotal         = isNaN(parseFloat(document.getElementById('margeTotal').value)) ? 150 : parseFloat(document.getElementById('margeTotal').value);
             const perteCoupe         = parseFloat(document.getElementById('perteCoupe').value)    || 3;
             const longueurUtilisable = longueurBarre - margeTotal;
 
@@ -3621,7 +3639,7 @@
         function genererDebitage() {
             if (pieces.length === 0) return;
             const longueurBarre      = parseFloat(document.getElementById('longueurBarre').value) || 6000;
-            const margeTotal         = parseFloat(document.getElementById('margeTotal').value)    || 150;
+            const margeTotal         = isNaN(parseFloat(document.getElementById('margeTotal').value)) ? 150 : parseFloat(document.getElementById('margeTotal').value);
             const perteCoupe         = parseFloat(document.getElementById('perteCoupe').value)    || 3;
             const longueurUtilisable = longueurBarre - margeTotal;
 
@@ -3953,7 +3971,7 @@
             }
 
             const longueurBarre = parseFloat(document.getElementById('longueurBarre').value) || 6000;
-            const margeTotal    = parseFloat(document.getElementById('margeTotal').value)    || 150;
+            const margeTotal    = isNaN(parseFloat(document.getElementById('margeTotal').value)) ? 150 : parseFloat(document.getElementById('margeTotal').value);
             const perteCoupe    = parseFloat(document.getElementById('perteCoupe').value)    || 3;
             const longueurUtilisable = longueurBarre - margeTotal;
 
@@ -5874,7 +5892,7 @@
             const noChantier      = document.getElementById('noChantier').value || '';
             const positionVal     = document.getElementById('position').value || '';
             const longueurBarreVal= parseFloat(document.getElementById('longueurBarre').value) || 6000;
-            const margeTotalVal   = parseFloat(document.getElementById('margeTotal').value) || 150;
+            const margeTotalVal   = isNaN(parseFloat(document.getElementById('margeTotal').value)) ? 150 : parseFloat(document.getElementById('margeTotal').value);
             const perteCoupeVal   = parseFloat(document.getElementById('perteCoupe').value) || 3;
             const dateExport      = new Date().toLocaleDateString('fr-CH');
             const hasPrixAny      = Object.values(prixParProfil).some(v => v.pm > 0 || v.pk > 0);
@@ -6182,7 +6200,7 @@
             // Enregistrer
             const prefix = hasPrixAny ? 'avec_prix_' : '';
             const dateStr = new Date().toISOString().split('T')[0];
-            await XLS.save(wb, `${prefix}Liste de débitage_${noChantier||'export'}_${dateStr}.xlsx`);
+            await XLS.save(wb, `${prefix}coupe_${noChantier||'export'}_${dateStr}.xlsx`);
         }
 
         function importerExcel(event) {
